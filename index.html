@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PetCare | Inicio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+  </head>
+  <body>
+
+    <nav class="navbar navbar-expand-lg  bg-transparent"> <!-- navbar-expand-lg Controla cuándo la navbar se expande/colapsa-->
+      <div class="container" id="container-navbar">
+        <a class="navbar-brand fw-bold" href="#">PetCare</a>
+
+       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarLinks" aria-controls="navbarLinks" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+       </button>
+
+     <div class="collapse navbar-collapse" id="navbarLinks"> <!--collapse oculta el div en pantallas pequeñas-->
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0"> <!--mx atuo empuja todo al centro-->
+
+          <li class="nav-item">
+            <a class="nav-link active fw-bold text-dark" aria-current="page" href="#">Home</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link fw-bold text-dark" href="#">Nuestros Servicios</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link fw-bold text-dark" href="#">Sobre Nosotros</a>
+          </li>
+        </ul>
+
+       <a class="btn btn-outline-dark rounded-pill d-inline-flex align-items-center" href="#" id="btn-google-login">
+
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" class="me-2">
+            <path fill="#4285F4" d="M17.64 9.20455c0-.63864-.05727-1.25182-.16818-1.84091H9.18182v3.48182h4.79091c-.20727.99636-.83864 1.94636-1.82045 2.61818v2.25818h2.90818c1.70182-1.56636 2.68636-3.87364 2.68636-6.49727z"/>
+            <path fill="#34A853" d="M9.18182 18c2.43 0 4.47-.80545 5.96182-2.18182l-2.90818-2.25818c-.80545.54273-1.84091.86818-2.99091.86818-2.32182 0-4.28364-1.56636-4.98-3.675H1.20364v2.33364C2.70545 16.14909 5.69818 18 9.18182 18z"/>
+            <path fill="#FBBC05" d="M4.20182 10.71c-.20727-.60409-.32364-1.25182-.32364-1.92818s.11636-1.32409.32364-1.92818V4.51909H1.20364C.43636 5.89909 0 7.55091 0 9.28364s.43636 3.38455 1.20364 4.76455l2.99818-2.33818z"/>
+            <path fill="#EA4335" d="M9.18182 3.57909c1.32409 0 2.50727.45818 3.44273 1.35455l2.58364-2.58364C13.65182.97364 11.61182 0 9.18182 0 5.69818 0 2.70545 1.85091 1.20364 4.51909l2.99818 2.33818c.69636-2.10864 2.65818-3.67727 4.98-3.67727z"/>
+          </svg>
+
+          Iniciar sesión
+        </a>
+     </div>
+
+      </div>
+    </nav>
+
+    <main class="container my-5 position-relative" >  <!--Principal con margen top y bottom 5-->
+      <div class="row align-items-center"> <!--Roe crea un contenedor horizontal-->
+
+        <div class="col-lg-5"> <!--se toman 6 d las 12 columnas es decir %50-->
+          <p class="fw-bold hero-badge">#AmorAnimal</p>
+          <h1 class="display-3 fw-bolder">Garantizamos el cuidado y el apoyo a su mascota querida</h1>  <!--Display 3 hace el texto nucho mas grande-->
+          <p class="lead fw-bold my-4">Nuestra clínica veterinaria ofrece atención integral y compasiva para sus queridas mascotas.</p> <!--Lead poco mas grande y menos grosor-->       <!-- txt-muted color gris sutil -->
+
+          <div>
+            <a href="#" class="btn btn-agendar btn-lg me-2">Agendar Cita</a>
+            <a href="#" class="btn btn-outline-dark btn-lg rounded-pill">Ver Tienda</a>
+          </div>
+
+        </div>
+
+        <div class="col-lg-7 mt-4 mt-lg-0">
+            <div class="row g-3"> <!--g3 egap 3 crea espaciado en las imagenes-->
+              
+            <div class="col-6">  <!-- Col 6 para cubriri las 4 imagenes -->
+              <img src="/assets/images/gato-veterinaria.jpg" class="img-fluid" alt="Gato en consulta" id="img-hero-1">   <!-- fluid hace que la imagen no sea mas grande que el contendero -->
+            </div>
+
+            <div class="col-6">
+             <img src="/assets/images/exterior-perros.jpg" class="img-fluid  rounded-circle" alt="Dos perritos en el exterior " id="img-hero-2">
+            </div>
+
+            <div class="col-6">
+              <img src="/assets/images/interior-gato.jpg" class="img-fluid" alt="Espacio para imagen 4" id="img-hero-3">
+            </div>
+
+            <div class="col-6">
+             
+              <img src="/assets/images/perro-veterinaria.jpg" class="img-fluid" alt="Perro feliz en consulta" id="img-hero-4">
+            </div>
+        </div>
+
+      </div>
+    </main>
+
+    <section class="py-5" style="background-color: #E7FCF4;">
+      <div class="container">
+        
+        <h2 class="text-center fw-bold mb-2">Nuestros Servicios</h2>
+        <div class="d-flex justify-content-center mb-5">
+            <div class="linea-verde"></div>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-md-4">
+            <div class="card card-servicio card-color-1 text-white border-0 shadow-lg h-100">
+              <div class="card-body text-center p-5">
+                <i class="bi bi-heart-pulse-fill display-3"></i>
+                <h3 class="card-title fw-bold mt-3 precio-servicio">Consulta General</h3>
+                <p class="card-text mt-3">Revisión completa, diagnóstico y calendario de vacunas.</p>
+                <p class="fs-4 fw-bold mt-3">$350.00 MXN</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="card card-servicio card-color-2 text-white border-0 shadow-lg h-100">
+              <div class="card-body text-center p-5">
+                <i class="bi bi-shield-plus display-3"></i> <h3 class="card-title fw-bold mt-3 precio-servicio">Vacunación</h3>
+                <p class="card-text mt-3">Protege a tu mascota con nuestro esquema completo de vacunación.</p>
+                <p class="fs-4 fw-bold mt-3">$250.00 MXN</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="card card-servicio card-color-3 text-white border-0 shadow-lg h-100">
+              <div class="card-body text-center p-5">
+                <i class="bi bi-scissors display-3"></i> <h3 class="card-title fw-bold mt-3 precio-servicio">Estética Canina</h3>
+                <p class="card-text mt-3">Baño, corte de pelo, limpieza de oídos y corte de uñas.</p>
+                <p class="fs-4 fw-bold mt-3">$450.00 MXN</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+    
+
+
+
+      </div>
+      
+    </section>
+
+<section class="py-5">
+      <div class="container">
+        
+        <h2 class="text-center fw-bold mb-2">Un poco de nuestro catalogo</h2>
+        <div class="d-flex justify-content-center mb-5">
+            <div class="linea-verde"></div>
+        </div>
+
+        <div class="row g-4">
+
+          <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 card-producto">
+              <img src="assets/images/producto-alimento.jpg" class="card-img-top" alt="Alimento Purina Pro Plan para perro">
+              <div class="card-body d-flex flex-column justify-content-between">
+                <small class="text-muted">Alimento para perro</small>
+                <h5 class="card-title fw-bold">Purina Pro Plan Adulto</h5>
+                <p class="card-text text-muted">Croquetas para perro adulto, raza mediana/grande. 6LB.</p>
+                <p class="fs-4 fw-bold precio-tienda mt-auto">$1,850.00 MXN</p>
+                <a href="#" class="btn btn-tienda fw-bold">Comprar Ahora</a>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 card-producto">
+              <img src="assets/images/producto-correa.jpg" class="card-img-top" alt="Correa retráctil Flexi">
+              <div class="card-body d-flex flex-column justify-content-between">
+                <small class="text-muted">Accesorios</small>
+                <h5 class="card-title fw-bold">Correa Retráctil Flexi</h5>
+                <p class="card-text text-muted">Correa de 5 metros, sistema de frenado cómodo, para perros de hasta 25kg.</p>
+                <p class="fs-4 fw-bold precio-tienda mt-auto">$590.00 MXN</p>
+                <a href="#" class="btn btn-tienda fw-bold">Comprar Ahora</a>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 card-producto">
+              <img src="assets/images/producto-juguete.jpg" class="card-img-top" alt="Juguete KONG para perro">
+              <div class="card-body d-flex flex-column justify-content-between">
+                <small class="text-muted">Juguetes</small>
+                <h5 class="card-title fw-bold">Juguete KONG Classic</h5>
+                <p class="card-text text-muted">Juguete dispensador de premios. Estimula la mente y alivia la ansiedad.</p>
+                <p class="fs-4 fw-bold precio-tienda mt-auto">$280.00 MXN</p>
+                <a href="#" class="btn btn-tienda fw-bold">Comprar Ahora</a>
+              </div>
+            </div>
+          </div>
+
+        </div> </div> </section>
+
+    <section class="container-fluid cta-section text-white text-center py-5">
+      <div class="container">
+        <h2 class="display-5 fw-bold">¿Listo para cuidar a tu mascota?</h2>
+        <p class="lead my-4">Agenda tu cita hoy y dale a tu compañero el cuidado que merece.</p>
+        <a href="#" class="btn btn-light-custom btn-lg fw-bold px-5 py-3">Contactar Ahora</a>
+      </div>
+    </section>
+
+
+    <footer class="footer-oscuro text-white py-5">
+    <div class="container">
+      <div class="row g-4">
+        
+        <div class="col-md-4">
+          <h4 class="fw-bold fs-3">VetCare</h4>
+          <p>
+            Cuidando a tus mejores amigos con profesionalismo 
+            y cariño desde 2010.
+          </p>
+        </div>
+
+        <div class="col-md-4">
+          <h5 class="fw-bold mb-3">Contacto</h5>
+          <ul class="list-unstyled">
+            <li class="mb-2"><i class="bi bi-telephone-fill me-2"></i> +34 123 456 789</li>
+            <li class="mb-2"><i class="bi bi-envelope-fill me-2"></i> info@vetcare.com</li>
+            <li class="mb-2"><i class="bi bi-geo-alt-fill me-2"></i> Calle Principal 123, Ciudad</li>
+          </ul>
+        </div>
+
+        <div class="col-md-4">
+          <h5 class="fw-bold mb-3">Síguenos</h5>
+          <div>
+            <a href="#" class="text-white me-2 fs-4"><i class="bi bi-facebook"></i></a>
+            <a href="#" class="text-white me-2 fs-4"><i class="bi bi-instagram"></i></a>
+          </div>
+          <h6 class="fw-bold mt-4 mb-2">Horario:</h6>
+          <p>Lunes a Sábado <br> 9:00 AM - 8:00 PM</p>
+        </div>
+      </div>
+
+      <hr class="my-4">
+      <p class="text-center text-muted">&copy; 2025 VetCare. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  </body>
+</html>
