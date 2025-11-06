@@ -1,16 +1,15 @@
-/*
 // =========================================================
 // CONFIGURACIÓN DE FIREBASE
 // =========================================================
 const firebaseConfig = {
-  apiKey: "AIzaSyDtMue0tHhYAnMX2gxZeNHyovYZI1NQgws",
-  authDomain: "edds-aplicaciones-ad2025.firebaseapp.com",
-  projectId: "edds-aplicaciones-ad2025",
-  storageBucket: "edds-aplicaciones-ad2025.firebasestorage.app",
-  messagingSenderId: "891364040951",
-  appId: "1:891364040951:web:4fb519d171863c30f533f2",
-  measurementId: "G-SSB0V7BKKG"
-}
+  apiKey: "AIzaSyCb7ka8ExRoYk6YykUpKKVMvoKk_JfP2ko",
+  authDomain: "petcare-4a63f.firebaseapp.com",
+  projectId: "petcare-4a63f",
+  storageBucket: "petcare-4a63f.firebasestorage.app",
+  messagingSenderId: "443204856539",
+  appId: "1:443204856539:web:9f7362bd4a5a468ce27afe",
+  measurementId: "G-GSYEF3PB7K"
+};
 
 //  Evita inicializar Firebase más de una vez
 if (!firebase.apps.length) {
@@ -117,7 +116,7 @@ auth.onAuthStateChanged(user => {
   if (welcomeMessage && loginButton && logoutBtn) {
     if (user) {
       // Mostrar bienvenida y botón de cerrar sesión
-      welcomeMessage.textContent = `👋 Bienvenido, ${user.displayName || user.email}`
+      welcomeMessage.textContent = `👋 Bienvenid@, ${user.displayName || user.email}`
       loginButton.classList.add('d-none')
       logoutBtn.classList.remove('d-none')
     } else {
@@ -136,8 +135,7 @@ if (logoutBtn) {
   logoutBtn.addEventListener('click', () => {
     auth.signOut().then(() => {
       alert('Sesión cerrada 👋')
-      window.location.href = 'login.html'
+      window.location.href = 'index.html'
     })
   })
 }
-*/
