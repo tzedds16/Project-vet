@@ -4,7 +4,7 @@
   --color-secundario: #14B8A6; /* Turquesa para acentos */
   --color-fondo: #F6FBFA;     /* Blanco suave para el fondo de la página */
   --color-fondo-acento: #E7FCF4; /* Verde muy pálido para secciones */
-  --color-fuente-oscuro: #2c3e50; /* El color de tu footer, para texto principal */
+  --color-fuente-oscuro: #2c3e50; /* El color del footer, para texto principal */
 }
 
 .btn-agendar {
