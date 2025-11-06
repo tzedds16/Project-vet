@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calendario Veterinario</title>
+  <link rel="stylesheet" href="CalendarioVeterinaria.css" />
+</head>
+
+<body>
+  <section class="calendario-section">
+    <div class="calendario-card">
+      <h2 class="titulo-calendario">Agenda tu Cita Veterinaria</h2>
+      <div class="linea-verde"></div>
+
+      <p class="texto-calendario">
+        Horario de Atención: Lunes a Sabado de 8am-8pm<br/>
+        Selecciona el día y la hora que mejor se ajusten para cuidar a tu compañero.
+      </p>
+
+      <form id="form-calendario" class="form-calendario">
+        <label for="fecha"> Fecha</label>
+        <input id="fecha" type="date" class="input-calendario" />
+
+        <!--
+        <label for="hora"> Hora</label>
+        <input id="hora" type="time" class="input-calendario" />
+      -->
+        <label for="hora"> Hora</label>
+        <select id="hora" class="input-calendario"></select>
+
+        <div class="btn-group">
+            <button type="submit" class="btn-agendar">
+            Confirmar Cita
+            </button>
+            <a href="../../index.html" class="btn-agendar">Regresar</a>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!--
+  <script>
+    const form = document.getElementById("form-calendario");
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const fecha = document.getElementById("fecha").value;
+      const hora = document.getElementById("hora").value;
+
+      if (!fecha || !hora) {
+        alert("Por favor selecciona una fecha y hora para tu cita ");
+        return;
+      }
+      alert(`Cita agendada para el ${fecha} a las ${hora}. ¡Gracias por confiar en VetCare!`);
+    });
+  </script>
+-->
+
+<script src="CalendarioVeterinaria.js">
+
+</script>
+
+</body>
+
+</html>
