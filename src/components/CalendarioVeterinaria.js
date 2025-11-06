@@ -1,28 +1,32 @@
-const form = document.getElementById("form-calendario");
-  const fechaInput = document.getElementById("fecha");
-  const horaSelect = document.getElementById("hora");
+  const form = document.getElementById("form-calendario");
+  const fechacita = document.getElementById("fecha");
+  const horacita = document.getElementById("hora");
 
-  function cargarHoras() {
+
+  function CargarHoras() {
     const horas = [];
     for (let h = 8; h <= 19.5; h++) {
       horas.push(`${String(h).padStart(2, "0")}:00`);
       horas.push(`${String(h).padStart(2, "0")}:30`);
     }
+
+
+
     horas.forEach((hora) => {
-      const option = document.createElement("option");
-      option.value = hora;
-      option.textContent = hora;
-      horaSelect.appendChild(option);
+      const opcion = document.createElement("option");
+      opcion.value = hora;
+      opcion.textContent = hora;
+      horacita.appendChild(opcion);
     });
   }
 
-  
-    const inputFecha = document.getElementById('fecha');
-    const hoy = new Date().toISOString().split('T')[0];
-    inputFecha.setAttribute('min', hoy);
+
+  const inputFecha = document.getElementById('fecha');
+  const hoy = new Date().toISOString().split('T')[0];
+  inputFecha.setAttribute('min', hoy);
 
 
-  fechaInput.addEventListener("change", function () {
+  fechacita.addEventListener("change", function () {
     const fecha = new Date(this.value);
     if (fecha.getDay() === 6) {
       alert("Los domingos no están disponibles para citas.");
@@ -32,23 +36,26 @@ const form = document.getElementById("form-calendario");
     }
   });
 
+
   function actualizarHorasOcupadas() {
     const citas = JSON.parse(localStorage.getItem("citas") || "[]");
-    const fechaSeleccionada = fechaInput.value;
-    [...horaSelect.options].forEach((option) => {
+    const fechaseleccionada = fechacita.value;
+    [...horacita.options].forEach((option) => {
       const hora = option.value;
       const reservada = citas.some(
-        (cita) => cita.fecha === fechaSeleccionada && cita.hora === hora
+        (cita) => cita.fecha === fechaseleccionada && cita.hora === hora
       );
       option.disabled = reservada;
       option.style.backgroundColor = reservada ? "#f8d7da" : "";
     });
   }
 
+
+
   form.addEventListener("submit", function (e) {
     e.preventDefault();
-    const fecha = fechaInput.value;
-    const hora = horaSelect.value;
+    const fecha = fechacita.value;
+    const hora = horacita.value;
 
     if (!fecha || !hora) {
       alert("Por favor selecciona una fecha y hora para tu cita.");
@@ -56,11 +63,11 @@ const form = document.getElementById("form-calendario");
     }
 
     const citas = JSON.parse(localStorage.getItem("citas") || "[]");
-    const yaOcupada = citas.some(
+    const ocupada = citas.some(
       (cita) => cita.fecha === fecha && cita.hora === hora
     );
 
-    if (yaOcupada) {
+    if (ocupada) {
       alert("Esta fecha y hora ya están ocupadas. Por favor elige otra.");
       return;
     }
@@ -73,4 +80,6 @@ const form = document.getElementById("form-calendario");
     actualizarHorasOcupadas();
   });
 
-  cargarHoras();
+
+
+  CargarHoras();
