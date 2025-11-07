@@ -51,8 +51,9 @@ if (toggleForm) {
   })
 }
 
+
 // =========================================================
-// LOGIN NORMAL
+// LOGIN NORMAL (MODIFICADO CON REDIRECCIÓN POR ROL)
 // =========================================================
 if (loginForm) {
   loginForm.addEventListener('submit', e => {
@@ -61,20 +62,29 @@ if (loginForm) {
     const password = document.getElementById('password').value
 
     auth.signInWithEmailAndPassword(email, password)
-      .then(() => {
-        alert('Inicio de sesión exitoso ✅')
-        window.location.href = 'index.html'
+      .then(userCredential => {
+
+        const user = userCredential.user;
+        return db.collection('usuarios').doc(user.uid).get();
       })
-      .catch(error => alert('Error: ' + error.message))
-  })
+      .then(doc => {
+
+        if (doc.exists && doc.data().rol === 'administrador') {
+          alert('Inicio de sesión como Administrador ✅');
+          window.location.href = 'admin-panel.html'; // <-- Redirige al panel de admin
+        } else {
+          alert('Inicio de sesión exitoso ✅');
+          window.location.href = 'index.html'; // <-- Redirige al inicio (clientes)
+        }
+      })
+      .catch(error => alert('Error: ' + error.message));
+  });
 }
 
 // =========================================================
 // REGISTRO DE USUARIO
 // =========================================================
-// =========================================================
-// REGISTRO DE USUARIO (CORREGIDO)
-// =========================================================
+
 if (registerForm) {
   registerForm.addEventListener('submit', e => {
     e.preventDefault()
@@ -112,27 +122,41 @@ if (registerForm) {
 }
 
 // =========================================================
-// LOGIN CON GOOGLE
+// LOGIN CON GOOGLE (MODIFICADO CON REDIRECCIÓN POR ROL)
 // =========================================================
 if (googleLogin) {
   googleLogin.addEventListener('click', () => {
-    const provider = new firebase.auth.GoogleAuthProvider()
+    const provider = new firebase.auth.GoogleAuthProvider();
+    let user; 
+
     auth.signInWithPopup(provider)
     .then(result => {
-      const user = result.user
+      user = result.user; 
       
+
       return db.collection('usuarios').doc(user.uid).set({
-        nombre: user.displayName, // Nombre de Google
+        nombre: user.displayName,
         email: user.email,
         ultimaConexion: firebase.firestore.FieldValue.serverTimestamp(),
-      }, { merge: true }) // <--- IMPORTANTE
+      }, { merge: true });
+
     })
     .then(() => {
-      alert('Inicio de sesión con Google exitoso y datos sincronizados')
-      window.location.href = 'index.html'
+     
+      return db.collection('usuarios').doc(user.uid).get();
     })
-    .catch(error => alert('Error: ' + error.message))
-  })
+    .then(doc => {
+
+        if (doc.exists && doc.data().rol === 'administrador') {
+          alert('Inicio de sesión como Administrador ✅');
+          window.location.href = 'admin-panel.html'; // <-- Redirige al panel de admin
+        } else {
+          alert('Inicio de sesión con Google exitoso ✅');
+          window.location.href = 'index.html'; // <-- Redirige al inicio (clientes)
+        }
+    })
+    .catch(error => alert('Error: ' + error.message));
+  });
 }
 
 // =========================================================
