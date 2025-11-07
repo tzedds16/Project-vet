@@ -17,6 +17,7 @@ if (!firebase.apps.length) {
 }
 
 const auth = firebase.auth()
+const db = firebase.firestore()
 
 // =========================================================
 // DETECTAR ELEMENTOS DEL DOM (si existen en la página)
@@ -71,6 +72,9 @@ if (loginForm) {
 // =========================================================
 // REGISTRO DE USUARIO
 // =========================================================
+// =========================================================
+// REGISTRO DE USUARIO (CORREGIDO)
+// =========================================================
 if (registerForm) {
   registerForm.addEventListener('submit', e => {
     e.preventDefault()
@@ -78,20 +82,33 @@ if (registerForm) {
     const username = document.getElementById('username').value
     const email = document.getElementById('regEmail').value
     const password = document.getElementById('regPassword').value
-
+    
     auth.createUserWithEmailAndPassword(email, password)
       .then(userCredential => {
         const user = userCredential.user
+
         return user.updateProfile({
           displayName: `${name} (${username})`
         })
+        .then(() => user)
       })
-      .then(() => {
-        alert('Cuenta creada correctamente 🎉')
-        window.location.href = 'index.html'
+
+      .then(user => {
+        return db.collection('usuarios').doc(user.uid).set({
+          nombre: name,
+          nombreUsuario: username,
+          mail: email,
+          fechaRegistro: firebase.firestore.FieldValue.serverTimestamp(),
+          rol: 'cliente'
+        })
       })
-      .catch(error => alert('Error: ' + error.message))
-  })
+
+       .then(() => {
+          alert('Cuenta creada y datos guardados correctamente 🎉')
+          window.location.href = 'index.html'
+        })
+        .catch(error => alert('Error: ' + error.message))
+    })
 }
 
 // =========================================================
@@ -101,11 +118,20 @@ if (googleLogin) {
   googleLogin.addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider()
     auth.signInWithPopup(provider)
-      .then(() => {
-        alert('Inicio de sesión con Google exitoso')
-        window.location.href = 'index.html'
-      })
-      .catch(error => alert('Error: ' + error.message))
+    .then(result => {
+      const user = result.user
+      
+      return db.collection('usuarios').doc(user.uid).set({
+        nombre: user.displayName, // Nombre de Google
+        email: user.email,
+        ultimaConexion: firebase.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true }) // <--- IMPORTANTE
+    })
+    .then(() => {
+      alert('Inicio de sesión con Google exitoso y datos sincronizados')
+      window.location.href = 'index.html'
+    })
+    .catch(error => alert('Error: ' + error.message))
   })
 }
 
@@ -127,6 +153,7 @@ auth.onAuthStateChanged(user => {
     }
   }
 })
+
 
 // =========================================================
 // CERRAR SESIÓN
