@@ -1,7 +1,9 @@
   const form = document.getElementById("form-calendario");
   const fechacita = document.getElementById("fecha");
   const horacita = document.getElementById("hora");
+  const motivo = document.getElementById("motivo");
 
+  
 
   function CargarHoras() {
     const horas = [];
