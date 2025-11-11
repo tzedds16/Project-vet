@@ -166,7 +166,7 @@ h1, h2, h3, h4, h5, h6, .fw-bolder {
   transition: color 0.3s ease;
 }
 
-/* estilos para calendario de clientes */
+/*Estilos para calendario de cliente*/
 .tabla-citas th, .tabla-citas td {
   padding: 0.5rem 0.5rem; 
   font-size: 0.9rem; 
