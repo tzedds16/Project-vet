@@ -1,0 +1,21 @@
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 15px;
+}
+
+input.form-control {
+  border-radius: 8px;
+}
+
+.btn {
+  border-radius: 10px;
+}
+
+.text-primary:hover {
+  text-decoration: underline;
+}
