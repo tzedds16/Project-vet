@@ -31,7 +31,7 @@ const welcomeMessage = document.getElementById('welcomeMessage')
 const logoutBtn = document.getElementById('logoutBtn')
 const loginButton = document.getElementById('loginBtn')
 const calendarioLink = document.getElementById('calendarioLink')
-
+const adminPanelBtn = document.getElementById('adminPanelBtn')
 
 // =========================================================
 // CAMBIAR ENTRE LOGIN Y REGISTRO
@@ -52,8 +52,9 @@ if (toggleForm) {
   })
 }
 
+
 // =========================================================
-// LOGIN NORMAL
+// LOGIN NORMAL (MODIFICADO CON REDIRECCIÓN POR ROL)
 // =========================================================
 if (loginForm) {
   loginForm.addEventListener('submit', e => {
@@ -62,12 +63,23 @@ if (loginForm) {
     const password = document.getElementById('password').value
 
     auth.signInWithEmailAndPassword(email, password)
-      .then(() => {
-        alert('Inicio de sesión exitoso ✅')
-        window.location.href = 'index.html'
+      .then(userCredential => {
+
+        const user = userCredential.user;
+        return db.collection('usuarios').doc(user.uid).get();
       })
-      .catch(error => alert('Error: ' + error.message))
-  })
+      .then(doc => {
+
+        if (doc.exists && doc.data().rol === 'administrador') {
+          alert('Inicio de sesión como Administrador ✅');
+          window.location.href = 'admin-panel.html'; // <-- Redirige al panel de admin
+        } else {
+          alert('Inicio de sesión exitoso ✅');
+          window.location.href = 'index.html'; // <-- Redirige al inicio (clientes)
+        }
+      })
+      .catch(error => alert('Error: ' + error.message));
+  });
 }
 
 // =========================================================
@@ -108,33 +120,47 @@ if (registerForm) {
 }
 
 // =========================================================
-// LOGIN CON GOOGLE
+// LOGIN CON GOOGLE (MODIFICADO CON REDIRECCIÓN POR ROL)
 // =========================================================
 if (googleLogin) {
   googleLogin.addEventListener('click', () => {
-    const provider = new firebase.auth.GoogleAuthProvider()
+    const provider = new firebase.auth.GoogleAuthProvider();
+    let user; 
+
     auth.signInWithPopup(provider)
     .then(result => {
-      const user = result.user
+      user = result.user; 
       
+
       return db.collection('usuarios').doc(user.uid).set({
-        nombre: user.displayName, // Nombre de Google
+        nombre: user.displayName,
         email: user.email,
         ultimaConexion: firebase.firestore.FieldValue.serverTimestamp(),
-      }, { merge: true }) // <--- IMPORTANTE
+      }, { merge: true });
+
     })
     .then(() => {
-      alert('Inicio de sesión con Google exitoso y datos sincronizados')
-      window.location.href = 'index.html'
+     
+      return db.collection('usuarios').doc(user.uid).get();
     })
-    .catch(error => alert('Error: ' + error.message))
-  })
+    .then(doc => {
+
+        if (doc.exists && doc.data().rol === 'administrador') {
+          alert('Inicio de sesión como Administrador ✅');
+          window.location.href = 'admin-panel.html'; // <-- Redirige al panel de admin
+        } else {
+          alert('Inicio de sesión con Google exitoso ✅');
+          window.location.href = 'index.html'; // <-- Redirige al inicio (clientes)
+        }
+    })
+    .catch(error => alert('Error: ' + error.message));
+  });
 }
 
 // =========================================================
 // DETECTAR USUARIO ACTUAL (para index.html)
 // =========================================================
-auth.onAuthStateChanged(user => {
+/*auth.onAuthStateChanged(user => {
   if (welcomeMessage && loginButton && logoutBtn) {
     if (user) {
       // Mostrar bienvenida y botón de cerrar sesión
@@ -165,7 +191,60 @@ auth.onAuthStateChanged(user => {
       logoutBtn.classList.add('d-none')
     }
   }
-})
+})*/
+
+// =========================================================
+// DETECTAR USUARIO ACTUAL (MODIFICADO PARA ROLES)
+// =========================================================
+auth.onAuthStateChanged(user=> {
+    const welcomeMessage = document.getElementById('welcomeMessage');
+    const loginButton = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+  
+  if (welcomeMessage && loginButton && logoutBtn) {
+  
+    if (user){ //esta logueado??
+    
+      db.collection('usuarios').doc(user.uid).get().then(doc => {
+        
+        
+        welcomeMessage.textContent = `👋 Bienvenid@, ${user.displayName || user.email}`;
+        loginButton.classList.add('d-none');
+        logoutBtn.classList.remove('d-none');
+
+       
+        const adminPanelBtn = document.getElementById('adminPanelBtn'); 
+        
+        if (adminPanelBtn){ 
+
+          if (doc.exists && doc.data().rol === 'administrador'){
+            adminPanelBtn.classList.remove('d-none');
+          } else {
+
+            adminPanelBtn.classList.add('d-none');
+          }
+        }
+
+      }).catch(error=>{
+        console.error("Error al obtener rol: ", error);
+        welcomeMessage.textContent = 'Error al cargar datos.';
+        loginButton.classList.add('d-none');
+        logoutBtn.classList.remove('d-none');
+      });
+
+    } else{
+      welcomeMessage.textContent = '';
+      loginButton.classList.remove('d-none');
+      logoutBtn.classList.add('d-none');
+    
+      const adminPanelBtn = document.getElementById('adminPanelBtn');
+      if (adminPanelBtn){
+        adminPanelBtn.classList.add('d-none');
+      }
+    }
+  }
+});
 
 // =========================================================
 // CERRAR SESIÓN
