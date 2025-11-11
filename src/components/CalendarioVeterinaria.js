@@ -110,6 +110,7 @@ if (!firebase.apps.length) {
     .where("fecha", "==", fechaSeleccionada)
     .where("estado", "in", ["activa", null]) // Incluye activas y citas antiguas sin estado
     .get();
+    const dbResponse = await db.collection("citas").where("fecha" , "==", fechaSeleccionada).get()
 
     const bookedHours = dbResponse.docs.map((appointmentDoc) => {  //ayuda a limpiar todo el arreglo de citas de dbresponse para solo obtner la hora
       return appointmentDoc.data().hora;
@@ -186,6 +187,9 @@ if (!firebase.apps.length) {
       .where('fecha', '==', fecha)
       .where('hora', '==', hora)
       .where("estado", "in", ["activa", null]) // Solo verificar citas activas
+      const consulta = await db.collection('citas') //varaible para ver si el dia ya esta ocupado
+      .where('fecha', '==', fecha)
+      .where('hora', '==', hora)
       .get();
 
       if (!consulta.empty) {

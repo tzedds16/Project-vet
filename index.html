@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="./assets/css/styles.css">
   </head>
   <body>
 
@@ -37,17 +37,27 @@
           </li>
         </ul>
 
-       <a class="btn btn-outline-dark rounded-pill d-inline-flex align-items-center" href="#" id="btn-google-login">
-
+        <!--  Botón para ir a login -->
+        <a class="btn btn-outline-dark rounded-pill d-inline-flex align-items-center" href="login.html" id="loginBtn">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" class="me-2">
             <path fill="#4285F4" d="M17.64 9.20455c0-.63864-.05727-1.25182-.16818-1.84091H9.18182v3.48182h4.79091c-.20727.99636-.83864 1.94636-1.82045 2.61818v2.25818h2.90818c1.70182-1.56636 2.68636-3.87364 2.68636-6.49727z"/>
             <path fill="#34A853" d="M9.18182 18c2.43 0 4.47-.80545 5.96182-2.18182l-2.90818-2.25818c-.80545.54273-1.84091.86818-2.99091.86818-2.32182 0-4.28364-1.56636-4.98-3.675H1.20364v2.33364C2.70545 16.14909 5.69818 18 9.18182 18z"/>
             <path fill="#FBBC05" d="M4.20182 10.71c-.20727-.60409-.32364-1.25182-.32364-1.92818s.11636-1.32409.32364-1.92818V4.51909H1.20364C.43636 5.89909 0 7.55091 0 9.28364s.43636 3.38455 1.20364 4.76455l2.99818-2.33818z"/>
             <path fill="#EA4335" d="M9.18182 3.57909c1.32409 0 2.50727.45818 3.44273 1.35455l2.58364-2.58364C13.65182.97364 11.61182 0 9.18182 0 5.69818 0 2.70545 1.85091 1.20364 4.51909l2.99818 2.33818c.69636-2.10864 2.65818-3.67727 4.98-3.67727z"/>
           </svg>
-
           Iniciar sesión
         </a>
+
+        <!--  Mensaje de bienvenida -->
+        <span id="welcomeMessage" class="fw-semibold ms-3 text-dark"></span>
+
+        <!--  Botón de cerrar sesión -->
+        <button id="logoutBtn" class="btn btn-outline-danger rounded-pill ms-3 d-none">Cerrar sesión</button>
+        <a id="adminPanelBtn" href="admin-panel.html" class="btn btn-warning rounded-pill ms-3 d-none">
+            <i class="bi bi-shield-lock me-1"></i>
+            Panel Admin
+        </a>
+
      </div>
 
       </div>
@@ -62,7 +72,7 @@
           <p class="lead fw-bold my-4">Nuestra clínica veterinaria ofrece atención integral y compasiva para sus queridas mascotas.</p> <!--Lead poco mas grande y menos grosor-->       <!-- txt-muted color gris sutil -->
 
           <div>
-            <a href="#" class="btn btn-agendar btn-lg me-2">Agendar Cita</a>
+            <a href="./src/components/CalendarioVeterinaria.html" class="btn btn-agendar btn-lg me-2">Agendar Cita</a>
             <a href="#" class="btn btn-outline-dark btn-lg rounded-pill">Ver Tienda</a>
           </div>
 
@@ -72,20 +82,20 @@
             <div class="row g-3"> <!--g3 egap 3 crea espaciado en las imagenes-->
               
             <div class="col-6">  <!-- Col 6 para cubriri las 4 imagenes -->
-              <img src="/assets/images/gato-veterinaria.jpg" class="img-fluid" alt="Gato en consulta" id="img-hero-1">   <!-- fluid hace que la imagen no sea mas grande que el contendero -->
+              <img src="./assets/images/gato-veterinaria.jpg" class="img-fluid" alt="Gato en consulta" id="img-hero-1">   <!-- fluid hace que la imagen no sea mas grande que el contendero -->
             </div>
 
             <div class="col-6">
-             <img src="/assets/images/exterior-perros.jpg" class="img-fluid  rounded-circle" alt="Dos perritos en el exterior " id="img-hero-2">
+             <img src="./assets/images/exterior-perros.jpg" class="img-fluid  rounded-circle" alt="Dos perritos en el exterior " id="img-hero-2">
             </div>
 
             <div class="col-6">
-              <img src="/assets/images/interior-gato.jpg" class="img-fluid" alt="Espacio para imagen 4" id="img-hero-3">
+              <img src="./assets/images/interior-gato.jpg" class="img-fluid" alt="Espacio para imagen 4" id="img-hero-3">
             </div>
 
             <div class="col-6">
              
-              <img src="/assets/images/perro-veterinaria.jpg" class="img-fluid" alt="Perro feliz en consulta" id="img-hero-4">
+              <img src="./assets/images/perro-veterinaria.jpg" class="img-fluid" alt="Perro feliz en consulta" id="img-hero-4">
             </div>
         </div>
 
@@ -237,7 +247,15 @@
       <p class="text-center text-muted">&copy; 2025 PetCare. Todos los derechos reservados.</p>
     </div>
   </footer>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+    <!--  SDKs de Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <!-- Logica -->
+    <script src="./assets/js/login.js"></script>
+    
   </body>
 </html>

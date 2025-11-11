@@ -147,4 +147,37 @@ function cancelarCita(citaId) {
         boton.innerHTML = textoOriginal;
         boton.disabled = false;
     });
+//func cargar citas
+function cargarCitas() {
+    const tbody = document.getElementById('citas-body');
+  
+     db.collection('citas').orderBy('fechaCreacion', 'desc').get().then(querySnapshot=> {
+    
+    
+    if (querySnapshot.empty) {
+      tbody.innerHTML='<tr><td colspan="6" class="text-center">No hay citas agendadas.</td></tr>'; //vacio??
+      return;
+    }
+    
+    tbody.innerHTML = ''; 
+    
+    querySnapshot.forEach(doc=> {
+      const cita =doc.data();       
+      const mascotaInfo=`${cita.tipoMascota || ''} (${cita.edad || ''})`;
+      tbody.innerHTML += `
+        <tr>
+          <td><strong>${cita.fecha}</strong></td>
+          <td>${cita.hora}</td>
+          <td>${cita.usuarioNombre || 'No registrado'}</td>
+          <td>${cita.motivo || 'No especificado'}</td>
+          <td>${mascotaInfo}</td>
+          <td>${cita.usuarioEmail || 'No registrado'}</td>
+        </tr>
+      `;
+    });
+
+  }).catch(error=>{
+      console.error("Error al cargar citas: ", error);
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error al cargar las citas.</td></tr>';
+  });
 }
