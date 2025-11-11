@@ -1,6 +1,14 @@
   const form = document.getElementById("form-calendario");
   const fechacita = document.getElementById("fecha");
   const horacita = document.getElementById("hora");
+  const tipoMascota = document.getElementById('tipoMascota');
+  const grupoTalla = document.getElementById('grupoTalla');
+
+  if (tipoMascota && grupoTalla) {
+    tipoMascota.addEventListener('change', () => {
+      grupoTalla.style.display = tipoMascota.value === 'perro' ? 'block' : 'none';
+    });
+  }
 
 
   function CargarHoras() {
