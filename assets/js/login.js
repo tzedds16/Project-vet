@@ -30,6 +30,7 @@ const formTitle = document.getElementById('formTitle')
 const welcomeMessage = document.getElementById('welcomeMessage')
 const logoutBtn = document.getElementById('logoutBtn')
 const loginButton = document.getElementById('loginBtn')
+const adminPanelBtn = document.getElementById('adminPanelBtn')
 
 
 // =========================================================
@@ -162,7 +163,7 @@ if (googleLogin) {
 // =========================================================
 // DETECTAR USUARIO ACTUAL (para index.html)
 // =========================================================
-auth.onAuthStateChanged(user => {
+/*auth.onAuthStateChanged(user => {
   if (welcomeMessage && loginButton && logoutBtn) {
     if (user) {
       // Mostrar bienvenida y botón de cerrar sesión
@@ -176,7 +177,60 @@ auth.onAuthStateChanged(user => {
       logoutBtn.classList.add('d-none')
     }
   }
-})
+})*/
+
+// =========================================================
+// DETECTAR USUARIO ACTUAL (MODIFICADO PARA ROLES)
+// =========================================================
+auth.onAuthStateChanged(user=> {
+    const welcomeMessage = document.getElementById('welcomeMessage');
+    const loginButton = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+  
+  if (welcomeMessage && loginButton && logoutBtn) {
+  
+    if (user){ //esta logueado??
+    
+      db.collection('usuarios').doc(user.uid).get().then(doc => {
+        
+        
+        welcomeMessage.textContent = `👋 Bienvenid@, ${user.displayName || user.email}`;
+        loginButton.classList.add('d-none');
+        logoutBtn.classList.remove('d-none');
+
+       
+        const adminPanelBtn = document.getElementById('adminPanelBtn'); 
+        
+        if (adminPanelBtn){ 
+
+          if (doc.exists && doc.data().rol === 'administrador'){
+            adminPanelBtn.classList.remove('d-none');
+          } else {
+
+            adminPanelBtn.classList.add('d-none');
+          }
+        }
+
+      }).catch(error=>{
+        console.error("Error al obtener rol: ", error);
+        welcomeMessage.textContent = 'Error al cargar datos.';
+        loginButton.classList.add('d-none');
+        logoutBtn.classList.remove('d-none');
+      });
+
+    } else{
+      welcomeMessage.textContent = '';
+      loginButton.classList.remove('d-none');
+      logoutBtn.classList.add('d-none');
+    
+      const adminPanelBtn = document.getElementById('adminPanelBtn');
+      if (adminPanelBtn){
+        adminPanelBtn.classList.add('d-none');
+      }
+    }
+  }
+});
 
 
 // =========================================================
