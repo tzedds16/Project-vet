@@ -11,7 +11,7 @@ const firebaseConfig = {
   measurementId: "G-GSYEF3PB7K"
 };
 
-//  Evita inicializar Firebase más de una vez
+
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig)
 }
@@ -30,8 +30,8 @@ const formTitle = document.getElementById('formTitle')
 const welcomeMessage = document.getElementById('welcomeMessage')
 const logoutBtn = document.getElementById('logoutBtn')
 const loginButton = document.getElementById('loginBtn')
+const calendarioLink = document.getElementById('calendarioLink')
 const adminPanelBtn = document.getElementById('adminPanelBtn')
-
 
 // =========================================================
 // CAMBIAR ENTRE LOGIN Y REGISTRO
@@ -97,13 +97,11 @@ if (registerForm) {
     auth.createUserWithEmailAndPassword(email, password)
       .then(userCredential => {
         const user = userCredential.user
-
         return user.updateProfile({
           displayName: `${name} (${username})`
         })
         .then(() => user)
       })
-
       .then(user => {
         return db.collection('usuarios').doc(user.uid).set({
           nombre: name,
@@ -113,7 +111,6 @@ if (registerForm) {
           rol: 'cliente'
         })
       })
-
        .then(() => {
           alert('Cuenta creada y datos guardados correctamente 🎉')
           window.location.href = 'index.html'
@@ -168,11 +165,28 @@ if (googleLogin) {
     if (user) {
       // Mostrar bienvenida y botón de cerrar sesión
       welcomeMessage.textContent = `👋 Bienvenid@, ${user.displayName || user.email}`
+      welcomeMessage.classList.remove('d-none');
+
+      // Muestra enlace de calendario 
+      if (calendarioLink) {
+        calendarioLink.classList.remove('d-none');
+      }
+
+      // Oculta Login y muestra Logout
       loginButton.classList.add('d-none')
       logoutBtn.classList.remove('d-none')
+
     } else {
       // Mostrar botón de login
       welcomeMessage.textContent = ''
+      welcomeMessage.classList.add('d-none');
+
+      // Oculta enlace de calendario
+      if (calendarioLink) {
+        calendarioLink.classList.add('d-none');
+      }
+
+      // Muestra Login y Oculta Logout
       loginButton.classList.remove('d-none')
       logoutBtn.classList.add('d-none')
     }
@@ -231,7 +245,6 @@ auth.onAuthStateChanged(user=> {
     }
   }
 });
-
 
 // =========================================================
 // CERRAR SESIÓN

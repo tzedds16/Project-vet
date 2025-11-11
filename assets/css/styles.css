@@ -167,8 +167,28 @@ h1, h2, h3, h4, h5, h6, .fw-bolder {
   transition: color 0.3s ease;
 }
 
-
-
+// Estilos para calendario de cliente
+.tabla-citas th, .tabla-citas td {
+  padding: 0.5rem 0.5rem; 
+  font-size: 0.9rem; 
+}
+.tabla-citas th {
+  width: 45%; 
+  color: var(--color-fuente-oscuro);
+  border-right: 1px solid var(--color-fondo-acento); 
+}
+.tabla-citas td {
+  font-weight: 600;
+  color: var(--color-secundario); 
+  } 
+.card-citas .btn {
+  font-size: 0.9rem;
+  padding: 0.4rem 0.8rem;
+ }
+.card-citas h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem !important;
+  
 @keyframes fadeIn {
   from {
     opacity: 0;
