@@ -33,6 +33,7 @@ const loginButton = document.getElementById('loginBtn')
 const calendarioLink = document.getElementById('calendarioLink')
 const adminPanelBtn = document.getElementById('adminPanelBtn')
 
+
 // =========================================================
 // CAMBIAR ENTRE LOGIN Y REGISTRO
 // =========================================================

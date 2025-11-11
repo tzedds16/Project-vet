@@ -188,7 +188,8 @@ h1, h2, h3, h4, h5, h6, .fw-bolder {
 .card-citas h2 {
   font-size: 1.25rem;
   margin-bottom: 1rem !important;
-  
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -351,4 +352,3 @@ h1, h2, h3, h4, h5, h6, .fw-bolder {
     color: var(--color-fuente-oscuro);
     transform: translateX(5px);
 }
-
