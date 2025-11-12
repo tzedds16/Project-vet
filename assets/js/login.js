@@ -11,7 +11,7 @@ const firebaseConfig = {
   measurementId: "G-GSYEF3PB7K"
 };
 
-//  Evita inicializar Firebase más de una vez
+
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig)
 }
@@ -30,7 +30,8 @@ const formTitle = document.getElementById('formTitle')
 const welcomeMessage = document.getElementById('welcomeMessage')
 const logoutBtn = document.getElementById('logoutBtn')
 const loginButton = document.getElementById('loginBtn')
-
+const calendarioLink = document.getElementById('calendarioLink')
+const adminPanelBtn = document.getElementById('adminPanelBtn')
 
 // =========================================================
 // CAMBIAR ENTRE LOGIN Y REGISTRO
@@ -96,13 +97,11 @@ if (registerForm) {
     auth.createUserWithEmailAndPassword(email, password)
       .then(userCredential => {
         const user = userCredential.user
-
         return user.updateProfile({
           displayName: `${name} (${username})`
         })
         .then(() => user)
       })
-
       .then(user => {
         return db.collection('usuarios').doc(user.uid).set({
           nombre: name,
@@ -112,7 +111,6 @@ if (registerForm) {
           rol: 'cliente'
         })
       })
-
        .then(() => {
           alert('Cuenta creada y datos guardados correctamente 🎉')
           window.location.href = 'index.html'
@@ -162,22 +160,229 @@ if (googleLogin) {
 // =========================================================
 // DETECTAR USUARIO ACTUAL (para index.html)
 // =========================================================
-auth.onAuthStateChanged(user => {
+/*auth.onAuthStateChanged(user => {
   if (welcomeMessage && loginButton && logoutBtn) {
     if (user) {
       // Mostrar bienvenida y botón de cerrar sesión
       welcomeMessage.textContent = `👋 Bienvenid@, ${user.displayName || user.email}`
+      welcomeMessage.classList.remove('d-none');
+
+      // Muestra enlace de calendario 
+      if (calendarioLink) {
+        calendarioLink.classList.remove('d-none');
+      }
+
+      // Oculta Login y muestra Logout
       loginButton.classList.add('d-none')
       logoutBtn.classList.remove('d-none')
+
     } else {
       // Mostrar botón de login
       welcomeMessage.textContent = ''
+      welcomeMessage.classList.add('d-none');
+
+      // Oculta enlace de calendario
+      if (calendarioLink) {
+        calendarioLink.classList.add('d-none');
+      }
+
+      // Muestra Login y Oculta Logout
       loginButton.classList.remove('d-none')
       logoutBtn.classList.add('d-none')
     }
   }
-})
+})*/
 
+// =========================================================
+// DETECTAR USUARIO ACTUAL (MODIFICADO PARA ROLES)
+// =========================================================
+/*auth.onAuthStateChanged(user=> {
+    const welcomeMessage = document.getElementById('welcomeMessage');
+    const loginButton = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+  
+  if (welcomeMessage && loginButton && logoutBtn) {
+  
+    if (user){ //esta logueado??
+    
+      db.collection('usuarios').doc(user.uid).get().then(doc => {
+        
+        
+        welcomeMessage.textContent = `👋 Bienvenid@, ${user.displayName || user.email}`;
+        loginButton.classList.add('d-none');
+        logoutBtn.classList.remove('d-none');
+
+       
+        const adminPanelBtn = document.getElementById('adminPanelBtn'); 
+        
+        if (adminPanelBtn){ 
+
+          if (doc.exists && doc.data().rol === 'administrador'){
+            adminPanelBtn.classList.remove('d-none');
+          } else {
+
+            adminPanelBtn.classList.add('d-none');
+          }
+        }
+
+      }).catch(error=>{
+        console.error("Error al obtener rol: ", error);
+        welcomeMessage.textContent = 'Error al cargar datos.';
+        loginButton.classList.add('d-none');
+        logoutBtn.classList.remove('d-none');
+      });
+
+    } else{
+      welcomeMessage.textContent = '';
+      loginButton.classList.remove('d-none');
+      logoutBtn.classList.add('d-none');
+    
+      const adminPanelBtn = document.getElementById('adminPanelBtn');
+      if (adminPanelBtn){
+        adminPanelBtn.classList.add('d-none');
+      }
+    }
+  }
+});*/
+
+// =========================================================
+// DETECTAR USUARIO ACTUAL (FUSIONADO: ROLES Y CALENDARIO)
+// =========================================================
+/*auth.onAuthStateChanged(user => {
+    // Definiciones de elementos (traídas de la segunda versión)
+    const welcomeMessage = document.getElementById('welcomeMessage');
+    const loginButton = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    // Elementos adicionales (incluimos calendarioLink)
+    const calendarioLink = document.getElementById('calendarioLink');
+    const adminPanelBtn = document.getElementById('adminPanelBtn'); 
+
+    if (welcomeMessage && loginButton && logoutBtn) {
+
+        if (user) { // ¿Está logueado?
+
+            // 1. Mostrar bienvenida y botones básicos
+            welcomeMessage.textContent = `👋 Bienvenid@, ${user.displayName || user.email}`;
+            loginButton.classList.add('d-none');
+            logoutBtn.classList.remove('d-none');
+            
+            // 2. Ejecutar lógica de base de datos para roles y links específicos
+            db.collection('usuarios').doc(user.uid).get().then(doc => {
+
+                // Lógica de Calendario (integrada de la primera versión)
+                if (calendarioLink) {
+                    calendarioLink.classList.remove('d-none');
+                }
+                
+                // Lógica de Panel de Administración (traída de la segunda versión)
+                if (adminPanelBtn) { 
+                    if (doc.exists && doc.data().rol === 'administrador') {
+                        adminPanelBtn.classList.remove('d-none');
+                    } else {
+                        adminPanelBtn.classList.add('d-none');
+                    }
+                }
+                
+            }).catch(error => {
+                console.error("Error al obtener rol o datos del usuario: ", error);
+                // Mantenemos al usuario logueado visualmente pero mostramos error
+                welcomeMessage.textContent = 'Error al cargar datos.';
+            });
+
+        } else { // No está logueado
+            welcomeMessage.textContent = '';
+            welcomeMessage.classList.add('d-none');
+            loginButton.classList.remove('d-none');
+            logoutBtn.classList.add('d-none');
+            
+            // Ocultar links de usuario (Calendario y Admin Panel)
+            if (calendarioLink) {
+                calendarioLink.classList.add('d-none');
+            }
+            if (adminPanelBtn) {
+                adminPanelBtn.classList.add('d-none');
+            }
+        }
+    }
+});*/
+
+// =========================================================
+// DETECTAR USUARIO ACTUAL (MODIFICADO PARA ROLES Y REDIRECCIÓN DE BOTÓN)
+// =========================================================
+auth.onAuthStateChanged(user => {
+    // Definiciones de elementos
+    const welcomeMessage = document.getElementById('welcomeMessage');
+    const loginButton = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    // Elementos adicionales
+    const calendarioLink = document.getElementById('calendarioLink');
+    // Asegúrate de que adminPanelBtn en tu HTML sea un <a> o <button>
+    // y que tenga un atributo href para la redirección.
+    const adminPanelBtn = document.getElementById('adminPanelBtn'); 
+
+    if (welcomeMessage && loginButton && logoutBtn) {
+
+        if (user) { // ¿Está logueado?
+            // 1. Mostrar bienvenida y botones básicos
+            welcomeMessage.textContent = `👋 Bienvenid@, ${user.displayName || user.email}`;
+            loginButton.classList.add('d-none');
+            logoutBtn.classList.remove('d-none');
+            
+            // 2. Ejecutar lógica de base de datos para roles y links específicos
+            db.collection('usuarios').doc(user.uid).get().then(doc => {
+
+                // Lógica de Calendario (mostrar link del calendario)
+                if (calendarioLink) {
+                    calendarioLink.classList.remove('d-none');
+                }
+                
+                // Lógica del Botón de Administración/Calendario
+                if (adminPanelBtn) { 
+                    // Aseguramos que el botón esté visible por defecto para usuarios logueados
+                    adminPanelBtn.classList.remove('d-none'); 
+
+                    if (doc.exists && doc.data().rol === 'administrador') {
+                        // ROL ADMINISTRADOR: Cambiar texto y enlace al Panel Admin
+                        adminPanelBtn.textContent = 'Panel Admin'; 
+                        adminPanelBtn.setAttribute('href', 'admin-panel.html');
+                        // OPCIONAL: Añadir una clase para diferenciar (ej: bg-danger)
+                        adminPanelBtn.classList.remove('btn-calendario');
+                        adminPanelBtn.classList.add('btn-admin');
+                        
+                    } else {
+                        // ROL CLIENTE: Cambiar texto y enlace a Mi Calendario
+                        adminPanelBtn.textContent = 'Mi Calendario';
+                        adminPanelBtn.setAttribute('href', 'calendarioCliente.html');
+                        // OPCIONAL: Añadir una clase para diferenciar (ej: bg-success)
+                        adminPanelBtn.classList.remove('btn-admin');
+                        adminPanelBtn.classList.add('btn-calendario');
+                    }
+                }
+                
+            }).catch(error => {
+                console.error("Error al obtener rol o datos del usuario: ", error);
+                welcomeMessage.textContent = 'Error al cargar datos.';
+            });
+
+        } else { // No está logueado
+            welcomeMessage.textContent = '';
+            welcomeMessage.classList.add('d-none');
+            loginButton.classList.remove('d-none');
+            logoutBtn.classList.add('d-none');
+            
+            // Ocultar links de usuario (Calendario y Admin Panel)
+            if (calendarioLink) {
+                calendarioLink.classList.add('d-none');
+            }
+            if (adminPanelBtn) {
+                adminPanelBtn.classList.add('d-none'); // Ocultar si no está logueado
+            }
+        }
+    }
+});
 
 // =========================================================
 // CERRAR SESIÓN

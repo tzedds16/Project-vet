@@ -66,34 +66,41 @@
               </a>
             </li>
             </ul>
+            <hr>
+                <a href="index.html" class="nav-link text-dark admin-sidebar-link">
+                     <i class="bi bi-house-door-fill me-2"></i>
+                        Volver al Inicio (Sitio Principal)
+                </a>
+          </div>
         </div>
-      </div>
 
       <div class="col-md-9 p-4">
 
         <div id="contenido-citas">
           <h2 class="fw-bold">Gestión de Citas </h2>
           <p>Aquí se mostrará la lista de todas las citas agendadas por los clientes.</p>
-          
-          <div class="table-responsive">
-            <table class="table table-striped table-hover" id="tabla-citas">
-              <thead>
-                <tr>
-                  <th scope="col">Fecha</th>
-                  <th scope="col">Hora</th>
-                  <th scope="col">ID del Cliente</th>
-                </tr>
-              </thead>
-              <tbody id="citas-body">
-                <tr><td colspan="3" class="text-center">Cargando citas...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        
-      </div>
+            <div class="table-responsive">
+              <table class="table table-striped table-hover" id="tabla-citas">
+        <thead>
+            <tr>
+                <th scope="col">Fecha</th>
+                <th scope="col">Hora</th>
+                <th scope="col">Cliente</th>
+                <th scope="col">Motivo</th>
+                <th scope="col">Mascota</th>
+                <th scope="col">Email</th>
+                <th scope="col">Estado</th>          <!-- Columna NUEVA -->
+                <th scope="col">Acciones</th>        <!-- Columna NUEVA -->
+            </tr>
+        </thead>
+        <tbody id="citas-body">
+            <tr><td colspan="8" class="text-center">Cargando citas...</td></tr>
+        </tbody>
+        </table>
     </div>
-  </main>
+  </div>
+</div>
+</main>
 
   <footer class="footer-oscuro text-white py-5">
     <div class="container">

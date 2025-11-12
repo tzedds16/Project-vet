@@ -56,7 +56,6 @@
 }
 
 
-
 .cta-section {
   background-color: var(--color-primario);
 }
@@ -167,7 +166,28 @@ h1, h2, h3, h4, h5, h6, .fw-bolder {
   transition: color 0.3s ease;
 }
 
-
+/*Estilos para calendario de cliente*/
+.tabla-citas th, .tabla-citas td {
+  padding: 0.5rem 0.5rem; 
+  font-size: 0.9rem; 
+}
+.tabla-citas th {
+  width: 45%; 
+  color: var(--color-fuente-oscuro);
+  border-right: 1px solid var(--color-fondo-acento); 
+}
+.tabla-citas td {
+  font-weight: 600;
+  color: var(--color-secundario); 
+  } 
+.card-citas .btn {
+  font-size: 0.9rem;
+  padding: 0.4rem 0.8rem;
+ }
+.card-citas h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem !important;
+}
 
 @keyframes fadeIn {
   from {
@@ -180,12 +200,10 @@ h1, h2, h3, h4, h5, h6, .fw-bolder {
   }
 }
 
-
 /*estilos panel admin*/
 #admin-contenido {
   animation: fadeIn 0.5s ease-out;
 }
-
 
 .admin-sidebar .nav-link {
   transition: all 0.2s ease-in-out;
@@ -201,14 +219,12 @@ h1, h2, h3, h4, h5, h6, .fw-bolder {
   transform: translateX(5px);
 }
 
-
 .admin-sidebar .nav-link.active {
   background-color: var(--color-primario); 
   color: white;
   font-weight: bold;
   border-left: 4px solid var(--color-primario);
 }
-
 
 #tabla-citas tbody tr {
   transition: all 0.2s ease;
@@ -220,3 +236,115 @@ h1, h2, h3, h4, h5, h6, .fw-bolder {
   box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
+/* ================================================== */
+/* ESTILOS PARA CANCELACIÓN DE CITAS - PANEL ADMIN */
+/* ================================================== */
+
+/* Estado de citas canceladas */
+.table-secondary {
+    opacity: 0.7;
+    background-color: #f8f9fa !important;
+}
+
+/* Badges de estado */
+.badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+}
+
+.badge.bg-success {
+    background-color: var(--color-primario) !important;
+}
+
+.badge.bg-danger {
+    background-color: #dc3545 !important;
+}
+
+/* Botón de cancelar */
+.btn-cancelar-cita {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    background-color: #dc3545;
+    border: none;
+    color: white;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.btn-cancelar-cita:hover {
+    background-color: #c82333;
+    transform: scale(1.05);
+    color: white;
+}
+
+.btn-cancelar-cita:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Efectos hover mejorados para la tabla */
+#tabla-citas tbody tr {
+    transition: all 0.2s ease;
+}
+
+#tabla-citas tbody tr:hover {
+    background-color: rgba(16, 185, 129, 0.1) !important;
+    transform: scale(1.01);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* Texto para citas canceladas */
+.text-muted {
+    color: #6c757d !important;
+    font-style: italic;
+}
+
+/* Responsive para la tabla */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .btn-cancelar-cita {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.4rem;
+    }
+    
+    .badge {
+        font-size: 0.7rem;
+    }
+}
+
+/* Loading states */
+.btn-cancelar-cita .bi-hourglass-split {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Mejora visual para el sidebar del admin */
+.admin-sidebar {
+    min-height: calc(100vh - 76px);
+    border-right: 1px solid #dee2e6;
+}
+
+.admin-sidebar-link {
+    transition: all 0.2s ease-in-out;
+    border-left: 4px solid transparent;
+    border-radius: 0;
+    color: var(--color-fuente-oscuro);
+    text-decoration: none;
+    display: block;
+    padding: 0.5rem 1rem;
+}
+
+.admin-sidebar-link:hover {
+    background-color: var(--color-fondo-acento);
+    border-left: 4px solid var(--color-secundario);
+    color: var(--color-fuente-oscuro);
+    transform: translateX(5px);
+}
