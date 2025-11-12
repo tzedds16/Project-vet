@@ -1,3 +1,11 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+
 /* === PALETA DE COLORES === */
 :root {
   --color-primario: #10B981;  /* Verde vibrante para botones y títulos */
@@ -20,14 +28,25 @@ h1, h2, h3, h4, h5, h6, .fw-bolder, .titulo-calendario {
 
 
 /* === SECCIÓN PRINCIPAL CALENDARIO === */
-.calendario-section {
+/*.calendario-section {
   background: var(--color-fondo-acento);
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 5rem 1rem;
   min-height: 100vh;
+}*/
+.calendario-section {
+  background: var(--color-fondo-acento);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;          /* ocupar toda la pantalla */
+  padding: 0;             /* sin margen interno vertical */
+  margin: 0;              /* sin margen exterior */
+  overflow: hidden;       /* evita scroll innecesario */
 }
+
 
 /* === TARJETA SIN FONDO BLANCO === */
 .calendario-card {
