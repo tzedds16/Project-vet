@@ -132,6 +132,9 @@ function cargarCitasCliente(usuarioId) {
             citasContainer.innerHTML += citaCard;
         });
 
+        agregarEventListenersCancelarCliente();
+
+
     }).catch(error => {
         loader.style.display = 'none';
         console.error("Error al cargar citas del cliente: ", error);
@@ -139,3 +142,48 @@ function cargarCitasCliente(usuarioId) {
         errorDiv.style.display = 'block';
     });
 }
+
+// Agregar eventos a los botones "Cancelar Cita" del cliente
+function agregarEventListenersCancelarCliente() {
+    const botonesCancelar = document.querySelectorAll('.btn-cancelar-cita');
+
+    botonesCancelar.forEach(boton => {
+        boton.addEventListener('click', function() {
+            const citaId = this.getAttribute('data-cita-id');
+            cancelarCitaCliente(citaId);
+        });
+    });
+}
+
+// Función para cancelar una cita (cliente)
+function cancelarCitaCliente(citaId) {
+    if (!confirm('¿Seguro que deseas cancelar esta cita?')) {
+        return;
+    }
+
+    const boton = document.querySelector(`.btn-cancelar-cita[data-cita-id="${citaId}"]`);
+    const textoOriginal = boton.innerHTML;
+    boton.innerHTML = '<i class="fas fa-hourglass-half"></i> Cancelando...';
+    boton.disabled = true;
+
+    db.collection('citas').doc(citaId).update({
+        estado: 'cancelada',
+        fechaCancelacion: firebase.firestore.FieldValue.serverTimestamp(),
+        canceladoPor: auth.currentUser.uid,
+        canceladoPorNombre: auth.currentUser.email
+    })
+    .then(() => {
+        alert('✅ Tu cita ha sido cancelada exitosamente.');
+
+        // Recargar las citas para reflejar el cambio
+        cargarCitasCliente(auth.currentUser.uid);
+    })
+    .catch(error => {
+        console.error("Error al cancelar cita:", error);
+        alert('❌ Error al cancelar la cita. Inténtalo de nuevo.');
+
+        boton.innerHTML = textoOriginal;
+        boton.disabled = false;
+    });
+}
+
