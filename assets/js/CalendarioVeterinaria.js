@@ -17,7 +17,7 @@ if (!firebase.apps.length) {
   // Esto comprueba el estado de la sesión EN CUANTO carga la página
   auth.onAuthStateChanged((user) => {
   if (!user) {
-    window.location.replace ("../../login.html");
+    window.location.replace ("login.html");
   }
   });
 
@@ -106,7 +106,7 @@ if (!firebase.apps.length) {
     const minutoActual = ahora.getMinutes();
 
 
-    const dbResponse = await db.collection("citas")
+    const dbResponse = await db.collection("citas") //consulta la base para ver las citas ocupadas
     .where("fecha", "==", fechaSeleccionada)
     .where("estado", "in", ["activa", null]) // Incluye activas y citas antiguas sin estado
     .get();
@@ -206,6 +206,7 @@ if (!firebase.apps.length) {
       motivo: motivo,
       tipoMascota: tipoMascota,
       edad: edad,
+      estado: 'activa',
       fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
     };
 
@@ -215,11 +216,8 @@ if (!firebase.apps.length) {
     
     const docRef = await db.collection('citas').add(nuevaCita);
 
-      alert(`Cita agendada para el ${fecha} a las ${hora}. Gracias por confiar en vetcare`)
+      window.location.href = 'calendarioCliente.html'
       console.log("Cita guardada con id:", docRef.id)
-      horacita.value=""; //reseta el selects
-      actualizarHorasOcupadas();
-
     } catch (error) {
       alert("Error al agendar la cita. Intenta de nuevo");
       console.log("Error al agendar la cita", error)
