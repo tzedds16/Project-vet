@@ -1,6 +1,17 @@
+
 const loader = document.getElementById('admin-loader');
 const errorDiv = document.getElementById('admin-error');
 const contenido = document.getElementById('admin-contenido');
+
+const seccionCitas = document.getElementById('contenido-citas');
+const seccionProductos = document.getElementById('contenido-productos');
+
+const btnCitas = document.getElementById('btn-ver-citas');
+const btnProductos = document.getElementById('btn-agregar-producto');
+
+const formProducto = document.getElementById('form-agregar-producto');
+
+
 
 auth.onAuthStateChanged(user => {
   if (user) {
@@ -13,7 +24,8 @@ auth.onAuthStateChanged(user => {
         contenido.style.display = 'flex'; //muestra el panel
         
     
-        cargarCitas();
+        cargarCitas(); 
+        mostrarPestanaProductos(); 
 
       } else {
             //no admin
@@ -33,17 +45,41 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-// Función cargar citas - VERSIÓN COMPLETA
+btnCitas.addEventListener('click', (e) => {
+  e.preventDefault(); 
+  seccionCitas.style.display = 'block';
+  seccionProductos.style.display = 'none';
+  
+  btnCitas.classList.add('active');
+  btnProductos.classList.remove('active');
+});
+
+
+btnProductos.addEventListener('click', (e) => {
+  e.preventDefault(); 
+  mostrarPestanaProductos(); 
+});
+
+
+function mostrarPestanaProductos() {
+  seccionCitas.style.display = 'none';
+  seccionProductos.style.display = 'block';
+  
+  btnCitas.classList.remove('active');
+  btnProductos.classList.add('active');
+}
+
+
+
 function cargarCitas() {
     const tbody = document.getElementById('citas-body');
     
-    db.collection('citas').orderBy('fechaCreacion', 'desc').get().then(querySnapshot => {
+    db.collection('citas').orderBy('fechaCreacion', 'desc').onSnapshot(querySnapshot => {
         
         if (querySnapshot.empty) {
             tbody.innerHTML = '<tr><td colspan="8" class="text-center">No hay citas agendadas.</td></tr>';
             return;
         }
-        
         tbody.innerHTML = ''; 
         
         querySnapshot.forEach(doc => {
@@ -77,13 +113,12 @@ function cargarCitas() {
 
         agregarEventListenersCancelar();
 
-    }).catch(error => {
-        console.error("Error al cargar citas: ", error);
+    }, error => { 
+        console.error("Error al cargar citas en tiempo real: ", error);
         tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Error al cargar las citas.</td></tr>';
     });
 }
 
-// Función para agregar event listeners a los botones de cancelar
 function agregarEventListenersCancelar() {
     const botonesCancelar = document.querySelectorAll('.btn-cancelar-cita');
     
@@ -95,7 +130,6 @@ function agregarEventListenersCancelar() {
     });
 }
 
-// Función para cancelar una cita
 function cancelarCita(citaId) {
     if (!confirm('¿Estás seguro de que deseas cancelar esta cita?\n\nEsta acción liberará el espacio para otros clientes.')) {
         return;
@@ -113,23 +147,47 @@ function cancelarCita(citaId) {
         canceladoPorNombre: auth.currentUser.displayName || 'Administrador'
     })
     .then(() => {
-        const fila = document.getElementById(`cita-${citaId}`);
-        fila.classList.add('table-secondary');
-        
-        const estadoBadge = fila.querySelector('.badge');
-        estadoBadge.className = 'badge bg-danger';
-        estadoBadge.textContent = 'cancelada';
-        
-        const tdAcciones = fila.querySelector('td:last-child');
-        tdAcciones.innerHTML = '<span class="text-muted"><i class="bi bi-ban"></i> Cancelada</span>';
-        
         alert('✅ Cita cancelada exitosamente. El espacio ha sido liberado.');
     })
     .catch(error => {
         console.error("Error cancelando cita:", error);
         alert('❌ Error al cancelar la cita: ' + error.message);
         
+        // Si falla, sí restauramos el botón
         boton.innerHTML = textoOriginal;
         boton.disabled = false;
     });
 }
+
+
+
+//agg producto
+formProducto.addEventListener('submit', (e) => {
+  e.preventDefault(); 
+  const nombre = document.getElementById('prod-nombre').value;
+  const categoria = document.getElementById('prod-categoria').value;
+  const precio = parseFloat(document.getElementById('prod-precio').value);
+  const descripcion = document.getElementById('prod-desc').value;
+  const imagenURL = document.getElementById('prod-img').value;
+  const stock = parseInt(document.getElementById('prod-stock').value);
+
+
+  db.collection('productos').add({
+    nombre: nombre,
+    categoria: categoria,
+    precio: precio,
+    descripcion: descripcion,
+    imagenURL: imagenURL ,
+    cantidad: stock
+  })
+  .then((docRef) => {
+   
+    alert(`✅ ¡Producto "${nombre}" agregado con éxito!`);
+    formProducto.reset(); 
+  })
+  .catch((error) => {
+  
+    console.error("Error al agregar producto: ", error);
+    alert('❌ Error al agregar producto: ' + error.message);
+  });
+});
