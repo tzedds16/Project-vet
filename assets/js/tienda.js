@@ -4,7 +4,7 @@ const errorMsg = document.getElementById('client-error');
 const productoContainer = document.getElementById("producto-container");
 const welcomeMessage = document.getElementById('welcomeMessage');
 const logoutBtn = document.getElementById('logoutBtn');
-const cartBtn = document.getElementById('cartBtn');
+const cartBtn = document.getElementById('cartBtn'); // Este es el elemento que cambia
 
 function formatearPrecioMX(valor) {
     return new Intl.NumberFormat("es-MX", {
@@ -29,7 +29,29 @@ auth.onAuthStateChanged(async user => {
         welcomeMessage.textContent = `👋 Bienvenid@, ${user.displayName || user.email}`;
         logoutBtn.classList.remove('d-none');
         cartBtn.classList.remove('d-none');
-        errorMsg.style.display = 'none'; // Asegurarse de que el mensaje de error esté oculto si está logueado
+        errorMsg.style.display = 'none';
+        
+        // Lógica para Identificar Admin y cambiar botón
+        try {
+            // 1. Obtener el documento del usuario desde Firestore usando el UID
+            const userDoc = await db.collection('usuarios').doc(user.uid).get();
+            
+            if (userDoc.exists && userDoc.data().rol === 'administrador') { 
+                // Si es ADMIN, cambiar el texto y el enlace del botón
+                cartBtn.innerHTML = 'Panel Admin';
+                cartBtn.href = 'admin-panel.html'; 
+            } else {
+                // Si es CLIENTE, asegurar que diga "Mi carrito"
+                cartBtn.innerHTML = '<i class="bi bi-cart-fill me-1"></i> Mi carrito';
+                cartBtn.href = 'carrito.html';
+                cartBtn.classList.add('btn-warning');
+                cartBtn.classList.remove('btn-info');
+            }
+        } catch (error) {
+            console.error("Error al verificar rol de usuario:", error);
+            cartBtn.innerHTML = '<i class="bi bi-cart-fill me-1"></i> Mi carrito'; 
+            cartBtn.href = 'carrito.html';
+        }
         
         logoutBtn.addEventListener('click', () => {
             auth.signOut().then(() => {
@@ -72,10 +94,12 @@ auth.onAuthStateChanged(async user => {
             return;
         }
 
+        productoContainer.innerHTML = ""; // limpiar contenedor
+
         snapshot.forEach(doc => {
             const producto = doc.data();
 
-            // Ignorar cantidadDisponible: el cliente NO la verá
+            // Usando la estructura de tarjeta alineada
             const card = `
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                     <div class="card h-100 shadow-sm border-0">
@@ -86,16 +110,11 @@ auth.onAuthStateChanged(async user => {
                                 alt="${producto.nombre}">
                         </div>
 
-                        <div class="card-body text-center d-flex flex-column">
-                            
+                        <div class="card-body text-center d-flex flex-column">  
                             <p class="text-muted fst-italic">${producto.categoria}</p> 
-
                             <h5 class="fw-bold mt-2 mb-auto">${producto.nombre}</h5> 
-                            
                             <p class="text-muted mb-2">${producto.descripcion}</p>
-                            
                             <p class="fw-bold text-success fs-5">${formatearPrecioMX(producto.precio)}</p>
-
                             <button class="btn btn-tienda mt-2"> 
                                 <i class="bi bi-cart-plus me-2"></i> Añadir al carrito
                             </button>
