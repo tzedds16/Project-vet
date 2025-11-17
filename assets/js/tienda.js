@@ -5,6 +5,8 @@ const productoContainer = document.getElementById("producto-container");
 const welcomeMessage = document.getElementById('welcomeMessage');
 const logoutBtn = document.getElementById('logoutBtn');
 const cartBtn = document.getElementById('cartBtn'); // Este es el elemento que cambia
+let esAdmin = false;
+
 
 function formatearPrecioMX(valor) {
     return new Intl.NumberFormat("es-MX", {
@@ -39,13 +41,15 @@ auth.onAuthStateChanged(async user => {
             if (userDoc.exists && userDoc.data().rol === 'administrador') { 
                 // Si es ADMIN, cambiar el texto y el enlace del botón
                 cartBtn.innerHTML = 'Panel Admin';
-                cartBtn.href = 'admin-panel.html'; 
+                cartBtn.href = 'admin-panel.html';
+                esAdmin = true; 
             } else {
                 // Si es CLIENTE, asegurar que diga "Mi carrito"
                 cartBtn.innerHTML = '<i class="bi bi-cart-fill me-1"></i> Mi carrito';
                 cartBtn.href = 'carrito.html';
                 cartBtn.classList.add('btn-warning');
                 cartBtn.classList.remove('btn-info');
+                esAdmin = false;
             }
         } catch (error) {
             console.error("Error al verificar rol de usuario:", error);
@@ -98,7 +102,19 @@ auth.onAuthStateChanged(async user => {
 
         snapshot.forEach(doc => {
             const producto = doc.data();
-
+            
+            if (esAdmin) {
+                botonHTML = `
+                    <a href="admin-panel.html?id=${doc.id}" class="btn btn-warning mt-2">
+                        <i class="bi bi-pencil-square me-2"></i> Editar
+                    </a>`;
+            } else {
+                botonHTML = `
+                    <button class="btn btn-tienda mt-2">
+                        <i class="bi bi-cart-plus me-2"></i> Añadir al carrito
+                    </button>
+                    `;
+            }
             // Usando la estructura de tarjeta alineada
             const card = `
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3">
@@ -115,9 +131,7 @@ auth.onAuthStateChanged(async user => {
                             <h5 class="fw-bold mt-2 mb-auto">${producto.nombre}</h5> 
                             <p class="text-muted mb-2">${producto.descripcion}</p>
                             <p class="fw-bold text-success fs-5">${formatearPrecioMX(producto.precio)}</p>
-                            <button class="btn btn-tienda mt-2"> 
-                                <i class="bi bi-cart-plus me-2"></i> Añadir al carrito
-                            </button>
+                            ${botonHTML}
                         </div>
                     </div>
                 </div>
