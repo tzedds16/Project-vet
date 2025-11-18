@@ -1,6 +1,4 @@
-// =========================================================
 // CONFIGURACIÓN DE FIREBASE
-// =========================================================
 const firebaseConfig = {
   apiKey: "AIzaSyCb7ka8ExRoYk6YykUpKKVMvoKk_JfP2ko",
   authDomain: "petcare-4a63f.firebaseapp.com",
@@ -19,9 +17,7 @@ if (!firebase.apps.length) {
 const auth = firebase.auth()
 const db = firebase.firestore()
 
-// =========================================================
 // DETECTAR ELEMENTOS DEL DOM (si existen en la página)
-// =========================================================
 const loginForm = document.getElementById('loginForm')
 const registerForm = document.getElementById('registerForm')
 const toggleForm = document.getElementById('toggleForm')
@@ -33,9 +29,7 @@ const loginButton = document.getElementById('loginBtn')
 const calendarioLink = document.getElementById('calendarioLink')
 const adminPanelBtn = document.getElementById('adminPanelBtn')
 
-// =========================================================
 // CAMBIAR ENTRE LOGIN Y REGISTRO
-// =========================================================
 if (toggleForm) {
   toggleForm.addEventListener('click', () => {
     if (loginForm.classList.contains('d-none')) {
@@ -53,9 +47,7 @@ if (toggleForm) {
 }
 
 
-// =========================================================
 // LOGIN NORMAL (MODIFICADO CON REDIRECCIÓN POR ROL)
-// =========================================================
 if (loginForm) {
   loginForm.addEventListener('submit', e => {
     e.preventDefault()
@@ -72,20 +64,17 @@ if (loginForm) {
 
         if (doc.exists && doc.data().rol === 'administrador') {
           alert('Inicio de sesión como Administrador ✅');
-          window.location.href = 'admin-panel.html'; // <-- Redirige al panel de admin
+          window.location.href = 'admin-panel.html'; //Redirige al panel de admin
         } else {
           alert('Inicio de sesión exitoso ✅');
-          window.location.href = 'index.html'; // <-- Redirige al inicio (clientes)
+          window.location.href = 'index.html'; //Redirige al inicio (clientes)
         }
       })
       .catch(error => alert('Error: ' + error.message));
   });
 }
 
-// =========================================================
 // REGISTRO DE USUARIO
-// =========================================================
-
 if (registerForm) {
   registerForm.addEventListener('submit', e => {
     e.preventDefault()
@@ -118,10 +107,7 @@ if (registerForm) {
         .catch(error => alert('Error: ' + error.message))
     })
 }
-
-// =========================================================
 // LOGIN CON GOOGLE (MODIFICADO CON REDIRECCIÓN POR ROL)
-// =========================================================
 if (googleLogin) {
   googleLogin.addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -147,19 +133,17 @@ if (googleLogin) {
 
         if (doc.exists && doc.data().rol === 'administrador') {
           alert('Inicio de sesión como Administrador ✅');
-          window.location.href = 'admin-panel.html'; // <-- Redirige al panel de admin
+          window.location.href = 'admin-panel.html'; //Redirige al panel de admin
         } else {
           alert('Inicio de sesión con Google exitoso ✅');
-          window.location.href = 'index.html'; // <-- Redirige al inicio (clientes)
+          window.location.href = 'index.html'; //Redirige al inicio (clientes)
         }
     })
     .catch(error => alert('Error: ' + error.message));
   });
 }
 
-// =========================================================
 // DETECTAR USUARIO ACTUAL (MODIFICADO PARA ROLES Y REDIRECCIÓN DE BOTÓN)
-// =========================================================
 auth.onAuthStateChanged(user => {
     // Definiciones de elementos
     const welcomeMessage = document.getElementById('welcomeMessage');
@@ -232,10 +216,7 @@ auth.onAuthStateChanged(user => {
         }
     }
 });
-
-// =========================================================
 // CERRAR SESIÓN
-// =========================================================
 if (logoutBtn) {
   logoutBtn.addEventListener('click', () => {
     auth.signOut().then(() => {
