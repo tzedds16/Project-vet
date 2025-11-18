@@ -37,7 +37,7 @@ function renderProductos(lista) {
             ? `<a href="admin-panel.html?id=${producto.id}" class="btn btn-warning mt-2">
                    <i class="bi bi-pencil-square me-2"></i> Editar
                </a>`
-            : `<button class="btn btn-tienda mt-2">
+            : `<button class="btn btn-tienda mt-2" onclick="agregarAlCarrito('${producto.id}')">
                    <i class="bi bi-cart-plus me-2"></i> Añadir al carrito
                </button>`;
 
@@ -185,3 +185,60 @@ auth.onAuthStateChanged(async user => {
     });
 
 });
+
+async function agregarAlCarrito(idProducto) {
+    const user = auth.currentUser; 
+    if (!user) {
+        alert("Debes inicar sesion para comprar")
+        return;
+    }
+
+    const productoEncontrado = productosGlobal.find(p => p.id === idProducto);
+    
+    if (!productoEncontrado) return;
+
+    //validacion para el stock
+    if (productoEncontrado.cantidad <= 0) {
+        alert("Lo sentimos, este producto esta agotado")
+        return;
+    }
+
+    try {
+        const querySnapshot = await db.collection('carrito') //pregunta si el producto ya existe en el carrito del usuario
+        .where('usuarioId', '==', user.uid)
+        .where('productoId', '==', idProducto)
+        .get()
+         
+        if (!querySnapshot.empty) { //si no esta vacio, se actualiza el contador en la base de datos
+            const docCarrito = querySnapshot.docs[0];
+            const dataActual = docCarrito.data();
+            const nuevaCantidad = dataActual.cantidad + 1;
+
+            if (nuevaCantidad > productoEncontrado.cantidad) {
+                alert(`⚠️ Solo hay ${productoEncontrado.cantidad} unidades disponibles.`);
+                return;
+            }
+
+            await db.collection('carrito').doc(docCarrito.id).update({
+                cantidad: nuevaCantidad
+            })
+        } else {
+           
+            await db.collection('carrito').add({
+                usuarioId: user.uid,
+                productoId: productoEncontrado.id,
+                nombre: productoEncontrado.nombre,
+                precio: productoEncontrado.precio,
+                imagenURL: productoEncontrado.imagenURL,
+                cantidad: 1, // Empieza con 1
+                fecha: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            alert(`✅ ${productoEncontrado.nombre} agregado al carrito.`);
+        }
+    } catch (error) {
+        console.error("Error en el carrito:", error);
+        alert("Error al procesar la solicitud.");
+    }
+ 
+}
