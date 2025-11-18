@@ -15,19 +15,59 @@ function formatearPrecioMX(valor) {
     }).format(Number(valor));
 }
 
-// ----------------------------------------------------
 // Lógica de Autenticación y Carga de Productos
-// ----------------------------------------------------
-
 // Iniciar mostrando el loader principal
 loader.style.display = 'block';
 productoContainer.innerHTML = '';
 errorMsg.style.display = 'none';
 
+let productosGlobal = []; // Aquí se guardan todos los productos
+function renderProductos(lista) {
+    productoContainer.innerHTML = "";
+
+    if (lista.length === 0) {
+        productoContainer.innerHTML = `
+            <p class="text-center text-muted">No hay productos en esta sección.</p>
+        `;
+        return;
+    }
+
+    lista.forEach(producto => {
+        const botonHTML = esAdmin
+            ? `<a href="admin-panel.html?id=${producto.id}" class="btn btn-warning mt-2">
+                   <i class="bi bi-pencil-square me-2"></i> Editar
+               </a>`
+            : `<button class="btn btn-tienda mt-2">
+                   <i class="bi bi-cart-plus me-2"></i> Añadir al carrito
+               </button>`;
+
+        const card = `
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-img-top-container d-flex justify-content-center align-items-center p-3">
+                        <img src="${producto.imagenURL}" class="card-img-top-custom" alt="${producto.nombre}">
+                    </div>
+
+                    <div class="card-body text-center d-flex flex-column">  
+                        <p class="text-muted fst-italic">${producto.categoria}</p> 
+                        <h5 class="fw-bold mt-2 mb-auto">${producto.nombre}</h5> 
+                        <p class="text-muted mb-2">${producto.descripcion}</p>
+                        <p class="fw-bold text-success fs-5">${formatearPrecioMX(producto.precio)}</p>
+                        ${botonHTML}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        productoContainer.innerHTML += card;
+    });
+}
+
+
 auth.onAuthStateChanged(async user => {
-    // 1. Lógica de UI de Autenticación
+    //Lógica de UI de Autenticación
     if (user) {
-        // ✅ USUARIO CONECTADO
+        // USUARIO CONECTADO
         welcomeMessage.textContent = `👋 Bienvenid@, ${user.displayName || user.email}`;
         logoutBtn.classList.remove('d-none');
         cartBtn.classList.remove('d-none');
@@ -35,7 +75,7 @@ auth.onAuthStateChanged(async user => {
         
         // Lógica para Identificar Admin y cambiar botón
         try {
-            // 1. Obtener el documento del usuario desde Firestore usando el UID
+            // 1.Obtener el documento del usuario desde Firestore usando el UID
             const userDoc = await db.collection('usuarios').doc(user.uid).get();
             
             if (userDoc.exists && userDoc.data().rol === 'administrador') { 
@@ -44,7 +84,7 @@ auth.onAuthStateChanged(async user => {
                 cartBtn.href = 'admin-panel.html';
                 esAdmin = true; 
             } else {
-                // Si es CLIENTE, asegurar que diga "Mi carrito"
+                //Si es CLIENTE, asegurar que diga "Mi carrito"
                 cartBtn.innerHTML = '<i class="bi bi-cart-fill me-1"></i> Mi carrito';
                 cartBtn.href = 'carrito.html';
                 cartBtn.classList.add('btn-warning');
@@ -64,12 +104,12 @@ auth.onAuthStateChanged(async user => {
         });
 
     } else {
-        // ❌ USUARIO DESCONECTADO
+        //USUARIO DESCONECTADO
         welcomeMessage.textContent = '';
         logoutBtn.classList.add('d-none');
         cartBtn.classList.add('d-none');
         
-        // MOSTRAR EL MENSAJE DE AVISO
+        //MOSTRAR EL MENSAJE DE AVISO
         errorMsg.style.display = 'block';
         errorMsg.innerHTML = `
             <p class="mb-2">No has iniciado sesión. Si deseas comprar o ver tu carrito, inicia sesión.</p>
@@ -77,18 +117,18 @@ auth.onAuthStateChanged(async user => {
             <button id="continueBtn" class="btn btn-secondary btn-sm">Seguir explorando</button>
         `;
 
-        // Botón para ir al login
+        //Botón para ir al login
         document.getElementById('goLoginBtn').addEventListener('click', () => {
             window.location.href = 'login.html';
         });
 
-        // Botón para continuar sin login (solo oculta el aviso)
+        //Botón para continuar sin login (solo oculta el aviso)
         document.getElementById('continueBtn').addEventListener('click', () => {
             errorMsg.style.display = 'none';
         });
     }
 
-    // 2. Lógica de Carga de Productos (Se ejecuta independientemente del login)
+    //Lógica de Carga de Productos (Se ejecuta independientemente del login)
     try {
         const snapshot = await db.collection("productos").get();
 
@@ -100,51 +140,48 @@ auth.onAuthStateChanged(async user => {
 
         productoContainer.innerHTML = ""; // limpiar contenedor
 
+        productosGlobal = []; // limpiar por si acaso
         snapshot.forEach(doc => {
-            const producto = doc.data();
-            
-            if (esAdmin) {
-                botonHTML = `
-                    <a href="admin-panel.html?id=${doc.id}" class="btn btn-warning mt-2">
-                        <i class="bi bi-pencil-square me-2"></i> Editar
-                    </a>`;
-            } else {
-                botonHTML = `
-                    <button class="btn btn-tienda mt-2">
-                        <i class="bi bi-cart-plus me-2"></i> Añadir al carrito
-                    </button>
-                    `;
-            }
-            // Usando la estructura de tarjeta alineada
-            const card = `
-                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                    <div class="card h-100 shadow-sm border-0">
-                        
-                        <div class="card-img-top-container d-flex justify-content-center align-items-center p-3">
-                            <img src="${producto.imagenURL}" 
-                                class="card-img-top-custom" 
-                                alt="${producto.nombre}">
-                        </div>
-
-                        <div class="card-body text-center d-flex flex-column">  
-                            <p class="text-muted fst-italic">${producto.categoria}</p> 
-                            <h5 class="fw-bold mt-2 mb-auto">${producto.nombre}</h5> 
-                            <p class="text-muted mb-2">${producto.descripcion}</p>
-                            <p class="fw-bold text-success fs-5">${formatearPrecioMX(producto.precio)}</p>
-                            ${botonHTML}
-                        </div>
-                    </div>
-                </div>
-            `;
-            productoContainer.innerHTML += card;
+            productosGlobal.push({
+                id: doc.id,
+                ...doc.data()
+            });
         });
+
+        // Mostrar todos los productos inicialmente
+        renderProductos(productosGlobal);
 
     } catch (error) {
         console.error("Error al cargar productos:", error);
         errorMsg.style.display = "block";
         errorMsg.textContent = "Error al cargar los productos.";
     } finally {
-        // 3. Ocultar el loader cuando la carga haya terminado.
+        //Ocultar el loader cuando la carga haya terminado.
         loader.style.display = "none";
     }
+        //Filtros por categoría
+    document.getElementById("pills-todos-tab").addEventListener("click", () => {
+        renderProductos(productosGlobal);
+    });
+
+    document.getElementById("pills-alimento-tab").addEventListener("click", () => {
+        const filtrados = productosGlobal.filter(p => p.categoria === "Alimento");
+        renderProductos(filtrados);
+    });
+
+    document.getElementById("pills-juguetes-tab").addEventListener("click", () => {
+        const filtrados = productosGlobal.filter(p => p.categoria === "Juguetes");
+        renderProductos(filtrados);
+    });
+
+    document.getElementById("pills-higiene-tab").addEventListener("click", () => {
+        const filtrados = productosGlobal.filter(p => p.categoria === "Higiene");
+        renderProductos(filtrados);
+    });
+
+    document.getElementById("pills-accesorios-tab").addEventListener("click", () => {
+        const filtrados = productosGlobal.filter(p => p.categoria === "Accesorios");
+        renderProductos(filtrados);
+    });
+
 });
