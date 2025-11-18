@@ -11,6 +11,13 @@ const btnProductos = document.getElementById('btn-agregar-producto');
 
 const formProducto = document.getElementById('form-agregar-producto');
 
+const params = new URLSearchParams(window.location.search);
+const idEditar = params.get("id");
+
+if (idEditar) {
+    cargarProductoParaEditar(idEditar);
+}
+
 
 
 auth.onAuthStateChanged(user => {
@@ -160,7 +167,7 @@ function cancelarCita(citaId) {
 }
 
 
-
+/*
 //agg producto
 formProducto.addEventListener('submit', (e) => {
   e.preventDefault(); 
@@ -190,4 +197,97 @@ formProducto.addEventListener('submit', (e) => {
     console.error("Error al agregar producto: ", error);
     alert('❌ Error al agregar producto: ' + error.message);
   });
+});
+
+*/
+
+// =======================================================
+//  EDITAR PRODUCTO (cargar info en el formulario)
+// =======================================================
+
+async function cargarProductoParaEditar(id) {
+    try {
+        const docProd = await db.collection("productos").doc(id).get();
+
+        if (docProd.exists) {
+            const p = docProd.data();
+
+            document.getElementById("prod-nombre").value = p.nombre;
+            document.getElementById("prod-categoria").value = p.categoria;
+            document.getElementById("prod-precio").value = p.precio;
+            document.getElementById("prod-desc").value = p.descripcion;
+            document.getElementById("prod-img").value = p.imagenURL;
+            document.getElementById("prod-stock").value = p.cantidad;
+
+            window.productoEditando = id;
+            formProducto.querySelector("button[type=submit]").innerHTML =
+                `<i class="bi bi-save me-2"></i> Actualizar Producto`;
+
+            console.log("Producto cargado para edición ✔");
+        } else {
+            alert("❌ No se encontró el producto.");
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
+
+// =======================================================
+//   Guardar o actualizar producto
+// =======================================================
+
+formProducto.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const nombre = document.getElementById('prod-nombre').value;
+    const categoria = document.getElementById('prod-categoria').value;
+    const precio = parseFloat(document.getElementById('prod-precio').value);
+    const descripcion = document.getElementById('prod-desc').value;
+    const imagenURL = document.getElementById('prod-img').value;
+    const stock = parseInt(document.getElementById('prod-stock').value);
+
+    const data = {
+        nombre,
+        categoria,
+        precio,
+        descripcion,
+        imagenURL,
+        cantidad: stock
+    };
+
+    // Si existe window.productoEditando → estamos editando
+    if (window.productoEditando) {
+
+        try {
+            await db.collection("productos")
+                .doc(window.productoEditando)
+                .update(data);
+
+            alert("✅ Producto actualizado correctamente.");
+
+            // Reset
+            window.productoEditando = null;
+            formProducto.reset();
+            formProducto.querySelector("button[type=submit]").innerHTML =
+                `<i class="bi bi-plus-circle me-2"></i> Guardar Producto`;
+
+        } catch (error) {
+            console.error(error);
+            alert("❌ Error al actualizar producto.");
+        }
+
+    } else {
+        // Modo agregar
+        db.collection("productos").add(data)
+            .then(() => {
+                alert(`✔ Producto agregado con éxito`);
+                formProducto.reset();
+            })
+            .catch(error => {
+                alert("❌ Error al agregar producto");
+                console.error(error);
+            });
+    }
 });

@@ -52,7 +52,7 @@ function cargarCitasCliente(usuarioId) {
             citasContainer.innerHTML = `
                 <div class="col-12 text-center my-5">
                     <p class="lead text-muted"><i class="far fa-calendar-times me-2"></i> No tienes citas agendadas.</p>
-                    <a href="CalendarioVeterinaria.html" class="btn btn-tienda mt-3">¡Agenda tu primera cita aquí!</a>
+                    <a href="agendar.html" class="btn btn-tienda mt-3">¡Agenda tu primera cita aquí!</a>
                 </div>`;
             return;
         }
@@ -143,7 +143,7 @@ function cargarCitasCliente(usuarioId) {
     });
 }
 
-// Agregar eventos a los botones "Cancelar Cita" del cliente
+// Cancelar la cita del cliente
 function agregarEventListenersCancelarCliente() {
     const botonesCancelar = document.querySelectorAll('.btn-cancelar-cita');
 
