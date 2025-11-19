@@ -172,6 +172,18 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
     </script>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3 mt-5" style="z-index: 11">
+  <div id="stockToast" class="toast fade" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header bg-danger text-white">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      <strong class="me-auto">Atención</strong>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body fw-bold" id="toastMensaje">
+      </div>
+  </div>
+</div>
     
     <script src="assets/js/tienda.js"></script>
 </body>

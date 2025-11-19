@@ -15,6 +15,19 @@ function formatearPrecioMX(valor) {
     }).format(Number(valor));
 }
 
+// Función para mostrar el Toast
+function mostrarNotificacion(mensaje) {
+    const toastEl = document.getElementById('stockToast');
+    const toastBody = document.getElementById('toastMensaje');
+    if (toastEl && toastBody) {
+        toastBody.textContent = mensaje;
+        const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+        toast.show();
+    } else {
+        mostrarNotificacion("Producto agotado");
+    }
+}
+
 // Lógica de Autenticación y Carga de Productos
 // Iniciar mostrando el loader principal
 loader.style.display = 'block';
@@ -22,44 +35,98 @@ productoContainer.innerHTML = '';
 errorMsg.style.display = 'none';
 
 let productosGlobal = []; // Aquí se guardan todos los productos
+let carritoMap = {};
+let listaActual = [];
+
+
+// Esta función auxiliar nos devuelve el HTML de los botones según el estado del carrito
+function generarBotonesHTML(producto) {
+    const enCarrito = carritoMap[producto.id];
+
+    if (esAdmin) {
+        return `<a href="admin-panel.html?id=${producto.id}" class="btn btn-warning mt-2">
+                   <i class="bi bi-pencil-square me-2"></i> Editar
+               </a>`;
+    } else if (enCarrito) {
+        // Muestra controles + y -
+        return `
+            <div class="d-flex justify-content-center align-items-center gap-3 mt-2">
+                <button class="btn btn-outline-danger rounded-circle" 
+                        onclick="actualizarCantidad('${producto.id}', -1)">
+                    <i class="bi bi-dash"></i>
+                </button>
+                
+                <span class="fw-bold fs-5">${enCarrito.cantidad}</span>
+                
+                <button class="btn btn-outline-success rounded-circle" 
+                        onclick="actualizarCantidad('${producto.id}', 1)">
+                    <i class="bi bi-plus"></i>
+                </button>
+            </div>
+        `;
+    } else {
+        // Muestra botón Añadir
+        return `
+           <button class="btn btn-tienda mt-2" onclick="agregarAlCarrito('${producto.id}')">
+               <i class="bi bi-cart-plus me-2"></i> Añadir al carrito
+           </button>`;
+    }
+}
+
 function renderProductos(lista) {
+    listaActual = lista;
     productoContainer.innerHTML = "";
 
     if (lista.length === 0) {
-        productoContainer.innerHTML = `
-            <p class="text-center text-muted">No hay productos en esta sección.</p>
-        `;
+        productoContainer.innerHTML = `<p class="text-center text-muted">No hay productos.</p>`;
         return;
     }
 
     lista.forEach(producto => {
-        const botonHTML = esAdmin
-            ? `<a href="admin-panel.html?id=${producto.id}" class="btn btn-warning mt-2">
-                   <i class="bi bi-pencil-square me-2"></i> Editar
-               </a>`
-            : `<button class="btn btn-tienda mt-2" onclick="agregarAlCarrito('${producto.id}')">
-                   <i class="bi bi-cart-plus me-2"></i> Añadir al carrito
-               </button>`;
+        // Verificamos si este producto ya está en el carrito del usuario
+        // Rojo si quedan menos de 5, gris si hay más
+        let stockClass = producto.cantidad < 5 ? "text-danger fw-bold" : "text-muted";
+        const botonesHTML = generarBotonesHTML(producto);
 
         const card = `
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3" id="card-${producto.id}">
                 <div class="card h-100 shadow-sm border-0">
                     <div class="card-img-top-container d-flex justify-content-center align-items-center p-3">
                         <img src="${producto.imagenURL}" class="card-img-top-custom" alt="${producto.nombre}">
                     </div>
-
                     <div class="card-body text-center d-flex flex-column">  
                         <p class="text-muted fst-italic">${producto.categoria}</p> 
                         <h5 class="fw-bold mt-2 mb-auto">${producto.nombre}</h5> 
                         <p class="text-muted mb-2">${producto.descripcion}</p>
                         <p class="fw-bold text-success fs-5">${formatearPrecioMX(producto.precio)}</p>
-                        ${botonHTML}
+                        <p class="${stockClass} mb-1" style="font-size: 0.9rem;"> <i class="bi bi-box-seam"></i> Disponibles: ${producto.cantidad}
+</p>
+                        
+                        <div id="btn-container-${producto.id}">
+                            ${botonesHTML}
+                        </div>
+                        
                     </div>
                 </div>
             </div>
         `;
-
         productoContainer.innerHTML += card;
+    });
+}
+
+function actualizarSoloBotones() {
+    // Recorremos la lista que el usuario está viendo actualmente
+    
+    const listaARecorrer = listaActual.length > 0 ? listaActual : productosGlobal;
+
+    listaARecorrer.forEach(producto => {
+        // Buscamos el contenedor específico de ESE producto
+        const contenedorBotones = document.getElementById(`btn-container-${producto.id}`);
+        
+        // Si el producto está en pantalla, actualizamos su HTML
+        if (contenedorBotones) {
+            contenedorBotones.innerHTML = generarBotonesHTML(producto);
+        }
     });
 }
 
@@ -72,6 +139,22 @@ auth.onAuthStateChanged(async user => {
         logoutBtn.classList.remove('d-none');
         cartBtn.classList.remove('d-none');
         errorMsg.style.display = 'none';
+
+        db.collection('carrito').where('usuarioId', '==', user.uid)
+          .onSnapshot((snapshot) => {
+              carritoMap = {}; // Reiniciamos el mapa para llenarlo de nuevo
+              
+              snapshot.forEach(doc => {
+                  const data = doc.data();
+                  // Guardamos: Clave = ID del Producto, Valor = Datos del carrito
+                  carritoMap[data.productoId] = {
+                      cantidad: data.cantidad,
+                      idDoc: doc.id // Necesitamos el ID del documento del carrito para editar/borrar
+                  };
+              });
+              
+              actualizarSoloBotones();
+          });
         
         // Lógica para Identificar Admin y cambiar botón
         try {
@@ -126,6 +209,9 @@ auth.onAuthStateChanged(async user => {
         document.getElementById('continueBtn').addEventListener('click', () => {
             errorMsg.style.display = 'none';
         });
+
+        carritoMap = {}; // Si no hay usuario, el carrito está vacío en memoria
+        renderProductos(productosGlobal);
     }
 
     //Lógica de Carga de Productos (Se ejecuta independientemente del login)
@@ -186,59 +272,73 @@ auth.onAuthStateChanged(async user => {
 
 });
 
+
 async function agregarAlCarrito(idProducto) {
     const user = auth.currentUser; 
     if (!user) {
-        alert("Debes inicar sesion para comprar")
+        alert("Debes iniciar sesión para comprar");
         return;
     }
 
-    const productoEncontrado = productosGlobal.find(p => p.id === idProducto);
+    const producto = productosGlobal.find(p => p.id === idProducto);
     
-    if (!productoEncontrado) return;
-
-    //validacion para el stock
-    if (productoEncontrado.cantidad <= 0) {
-        alert("Lo sentimos, este producto esta agotado")
+    // Validación básica de stock
+    if (producto.cantidad <= 0) {
+        alert("Producto agotado");
         return;
     }
 
     try {
-        const querySnapshot = await db.collection('carrito') //pregunta si el producto ya existe en el carrito del usuario
-        .where('usuarioId', '==', user.uid)
-        .where('productoId', '==', idProducto)
-        .get()
-         
-        if (!querySnapshot.empty) { //si no esta vacio, se actualiza el contador en la base de datos
-            const docCarrito = querySnapshot.docs[0];
-            const dataActual = docCarrito.data();
-            const nuevaCantidad = dataActual.cantidad + 1;
-
-            if (nuevaCantidad > productoEncontrado.cantidad) {
-                alert(`⚠️ Solo hay ${productoEncontrado.cantidad} unidades disponibles.`);
-                return;
-            }
-
-            await db.collection('carrito').doc(docCarrito.id).update({
-                cantidad: nuevaCantidad
-            })
-        } else {
-           
-            await db.collection('carrito').add({
-                usuarioId: user.uid,
-                productoId: productoEncontrado.id,
-                nombre: productoEncontrado.nombre,
-                precio: productoEncontrado.precio,
-                imagenURL: productoEncontrado.imagenURL,
-                cantidad: 1, // Empieza con 1
-                fecha: firebase.firestore.FieldValue.serverTimestamp()
-            });
-
-            alert(`✅ ${productoEncontrado.nombre} agregado al carrito.`);
-        }
+        
+        await db.collection('carrito').add({// Se crea el documento en Firebase
+            usuarioId: user.uid,
+            productoId: producto.id,
+            nombre: producto.nombre,
+            precio: producto.precio,
+            imagenURL: producto.imagenURL,
+            cantidad: 1, // Empieza con 1
+            fecha: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        // NOTA: No necesitamos hacer alert ni recargar la página. 
+        // El onSnapshot  detectará esto y actualizará el botón automáticamente.
+        
     } catch (error) {
-        console.error("Error en el carrito:", error);
-        alert("Error al procesar la solicitud.");
+        console.error("Error:", error);
     }
- 
+}
+
+
+async function actualizarCantidad(idProducto, cambio) {
+    // 'cambio' será 1 (sumar) o -1 (restar)
+    
+    const datosCarrito = carritoMap[idProducto]; // Recuperamos datos del mapa (idDoc, cantidad actual)
+    const productoInfo = productosGlobal.find(p => p.id === idProducto); // Info del producto (stock)
+
+    if (!datosCarrito) return; // Seguridad por si acaso
+
+    const nuevaCantidad = datosCarrito.cantidad + cambio;
+
+   
+    if (nuevaCantidad === 0) {  //  Lógica para ELIMINAR si llega a 0
+        try {
+            // Borramos el documento del carrito usando el ID que guardamos en el mapa
+            await db.collection('carrito').doc(datosCarrito.idDoc).delete();
+            // Al borrarse, onSnapshot se dispara -> renderProductos se ejecuta -> el botón vuelve a ser "Añadir"
+        } catch (e) { console.error(e); }
+        return;
+    }
+
+    // 2. Lógica para STOCK MÁXIMO
+    if (nuevaCantidad > productoInfo.cantidad) {
+        mostrarNotificacion(`⚠️ Solo hay ${productoInfo.cantidad} unidades disponibles.`);
+        return;
+    }
+
+    // 3. Actualizar base de datos
+    try {
+        await db.collection('carrito').doc(datosCarrito.idDoc).update({
+            cantidad: nuevaCantidad
+        });
+        // Al actualizarse, onSnapshot se dispara -> actualiza el número en pantalla
+    } catch (e) { console.error(e); }
 }

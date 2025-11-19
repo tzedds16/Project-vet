@@ -415,3 +415,37 @@ h1, h2, h3, h4, h5, h6, .fw-bolder {
     background-color: var(--color-primario);
     color: white;
 }
+
+
+@keyframes slideInRight {/* --- ANIMACIÓN DE ENTRADA --- */
+  from {
+      transform: translateX(100%);
+      opacity: 0;
+  }
+  to {
+      transform: translateX(0);
+      opacity: 1;
+  }
+}
+
+.toast.show {
+  animation: slideInRight 0.5s ease-out forwards;
+}
+
+
+@keyframes slideOutRight {/* --- ANIMACIÓN DE SALIDA --- */
+  from {
+      transform: translateX(0);
+      opacity: 1;
+  }
+  to {
+      transform: translateX(100%);
+      opacity: 0;
+  }
+}
+
+/* Agregamos !important para asegurar que Bootstrap no lo corte */
+.toast.hiding {
+  animation: slideOutRight 0.5s ease-in forwards !important;
+  opacity: 1; /* Mantiene la opacidad para que se vea el movimiento */
+}

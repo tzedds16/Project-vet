@@ -53,7 +53,7 @@
                         <span class="fs-4 fw-bold text-success" id="total-precio">$0.00</span>
                     </div>
 
-                    <button class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm">
+                    <button class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm" onclick="procesarCompra()">
                         Proceder al Pago <i class="bi bi-credit-card ms-2"></i>
                     </button>
                 </div>
@@ -62,9 +62,23 @@
 
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+   <div class="toast-container position-fixed top-0 end-0 p-3 mt-5" style="z-index: 11">
+  <div id="stockToast" class="toast fade" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header bg-danger text-white">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      <strong class="me-auto">Atención</strong>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body fw-bold" id="toastMensaje">
+      </div>
+  </div>
+</div>
 
     <script src="./assets/js/carrito.js"></script>
 
