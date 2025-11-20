@@ -1,28 +1,37 @@
-/* ---PALETA DE COLORES --- */
+/* ================================================== */
+/* PALETA DE COLORES Y VARIABLES GLOBALES */
+/* ================================================== */
 :root {
-  --color-primario: #10B981;  /* Verde vibrante para botones y títulos */
-  --color-secundario: #14B8A6; /* Turquesa para acentos */
-  --color-fondo: #F6FBFA;     /* Blanco suave para el fondo de la página */
-  --color-fondo-acento: #E7FCF4; /* Verde muy pálido para secciones */
-  --color-fuente-oscuro: #2c3e50; /* El color del footer, para texto principal */
+  --color-primario: #10B981;  /* Verde vibrante (Botones, Títulos) */
+  --color-secundario: #14B8A6; /* Turquesa (Acentos, Precios) */
+  --color-fondo: #F6FBFA;     /* Blanco suave (Fondo de página) */
+  --color-fondo-acento: #E7FCF4; /* Verde pálido (Fondo secciones/Tarjetas claras) */
+  --color-fuente-oscuro: #2c3e50; /* Fuente principal y Footer */
+  --color-rojo-peligro: #dc3545; /* Rojo para alertas/cancelar */
 }
 
-.btn-agendar {
-  background-color: var(--color-primario); 
-  color: white;
-  font-weight: bold;
-  border-radius: 50px; 
-  padding: 0.5rem 1.5rem;
-  transition: all 0.3s ease;
+/* ================================================== */
+/* ESTILOS GENERALES Y TIPOGRAFÍA */
+/* ================================================== */
+body {
+  font-family: 'Nunito', sans-serif !important; 
+  background-color: var(--color-fondo);
+  color: var(--color-fuente-oscuro);
 }
 
-.btn-agendar:hover {
-  background-color: var(--color-secundario); 
-  color: white;
-  transform: scale(1.05);
+h1, h2, h3, h4, h5, h6, .fw-bolder {
+  font-weight: 800 !important;
 }
 
+.text-primario {
+  color: var(--color-primario) !important; 
+}
 
+/* ================================================== */
+/* ESTILOS COMUNES DE TARJETAS Y COMPONENTES */
+/* ================================================== */
+
+/* Línea de separación */
 .linea-verde {
   width: 100px;
   height: 5px;
@@ -30,127 +39,43 @@
   border-radius: 5px;
 }
 
-
-.card-servicio {
+/* Estilo base para tarjetas de servicio y producto */
+.card-servicio, .card-producto {
   border-radius: 20px; 
   transition: all 0.3s ease;
+  background-color: #ffffff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  height: 100%;
 }
 
-.card-servicio:hover {
+.card-servicio:hover, .card-producto:hover {
   transform: translateY(-10px); 
   box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
 }
 
+/* Colores de fondo para tarjetas de servicio */
+.card-color-1 { background-color: #CCFBF1; } 
+.card-color-2 { background-color: #D1FAE5; } 
+.card-color-3 { background-color: var(--color-fondo-acento); }
 
-.card-color-1 {
-  background-color: #CCFBF1; /* Tu color de paleta */
+.card-color-1, .card-color-2, .card-color-3 {
   color: var(--color-fuente-oscuro) !important;
-}
-.card-color-2 {
-  background-color: #D1FAE5; /* Tu color de paleta */
-  color: var(--color-fuente-oscuro) !important;
-}
-.card-color-3 {
-  background-color: #E7FCF4; /* Tu color de paleta */
-  color: var(--color-fuente-oscuro) !important;
+  border-radius: 20px;
 }
 
+.card-servicio i { color: var(--color-primario); }
+.card-servicio .precio-servicio { color: var(--color-secundario); }
 
-.cta-section {
-  background-color: var(--color-primario);
-}
+/* Estilos de imágenes hero (si aplica) */
+#img-hero-1 { border-radius: 80px 0 0 80px; }
+#img-hero-3 { border-radius: 0 0 80px 80px; }
+#img-hero-4 { border-radius: 0 80px 80px 80px; }
 
-.cta-section .btn-light-custom {
-  border-radius: 50px;
-  color: var(--color-primario) !important; 
-  background-color: white;
-  font-weight: bold;
-}
+/* Navegación (Navbar) */
+.navbar-nav .nav-link:hover { color: var(--color-primario) !important; }
+.navbar-nav .nav-link { transition: color 0.3s ease; }
 
-/* --- Footer Oscuro --- */
-.footer-oscuro {
-  background-color: #2c3e50; 
-}
-
-.footer-oscuro ul li {
-  color: #bdc3c7; 
-}
-
-.footer-oscuro a {
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.footer-oscuro a:hover {
-  color: var(--color-primario); 
-}
-
-.card-producto {
-  border-radius: 15px; 
-  transition: all 0.3s ease;
-}
-
-.card-producto:hover {
-  transform: translateY(-10px); 
-  box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
-}
-
-#img-hero-1 {
-  border-radius: 80px 0 0 80px;
-}
-#img-hero-3 {
-  border-radius: 0 0 80px 80px;
-}
-#img-hero-4 {
-  border-radius: 0 80px 80px 80px;
-}
-
-
-/* --- ESTILOS GENERALES --- */
-/* Hacemos que toda la página use tu color de fondo */
-body {
-  font-family: 'Nunito', sans-serif;
-  background-color: var(--color-fondo);
-  color: var(--color-fuente-oscuro);
-}
-h1, h2, h3, h4, h5, h6, .fw-bolder {
-  font-weight: 800 !important; /* Vamos a utilizar la versión más 'bold' de Nunito */
-}
-
-.card-servicio i {
-  color: var(--color-primario);
-}
-.card-servicio .precio-servicio {
-  color: var(--color-secundario);
-}
-
-/* --- TARJETAS DE PRODUCTO (Tienda) --- */
-.card-producto {
-  background-color: #ffffff; /* Fondo blanco para las tarjetas */
-}
-
-/* Botón de Comprar en la tienda */
-.btn-tienda {
-  background-color: var(--color-primario);
-  color: white;
-  font-weight: bold;
-  border: none;
-  border-radius: 8px; /* Un radio más sutil */
-}
-.btn-tienda:hover {
-  background-color: var(--color-secundario);
-  color: white;
-}
-
-/* Precio en la tienda */
-.precio-tienda {
-  color: var(--color-primario);
-}
-
-.text-primario {
-  color: var(--color-primario) !important; 
-}
-
+/* Badge destacado */
 .hero-badge {
   display: inline-block; 
   color: var(--color-primario); 
@@ -159,234 +84,118 @@ h1, h2, h3, h4, h5, h6, .fw-bolder {
   padding: 0.5rem 1rem; 
   border-radius: 50px;  
 }
-.navbar-nav .nav-link:hover {
-  color: var(--color-primario) !important; 
+
+
+/* ================================================== */
+/* ESTILOS DE CALENDARIO VETERINARIO (CITA) */
+/* ================================================== */
+
+/* Contenedor principal */
+.calendario-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: auto; 
+    padding: 20px;
+    background-color: var(--color-fondo-acento); 
 }
-.navbar-nav .nav-link {
-  transition: color 0.3s ease;
+.calendario-card {
+    background-color: white;
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    max-width: 500px; 
+    width: 100%;
+    text-align: center;
+}
+.titulo-calendario {
+    color: var(--color-primario);
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    font-weight: 800;
+}
+.linea-verde { margin: 0.5rem auto 1.5rem auto; } 
+
+.texto-calendario {
+    color: var(--color-fuente-oscuro);
+    margin-bottom: 2rem;
+    line-height: 1.6;
 }
 
-/*Estilos para calendario de cliente*/
-.tabla-citas th, .tabla-citas td {
-  padding: 0.5rem 0.5rem; 
-  font-size: 0.9rem; 
+/* Formulario */
+.form-calendario {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; 
+    text-align: left;
 }
-.tabla-citas th {
-  width: 45%; 
-  color: var(--color-fuente-oscuro);
-  border-right: 1px solid var(--color-fondo-acento); 
+.form-calendario label {
+    font-weight: 700;
+    color: var(--color-fuente-oscuro);
+    margin-bottom: 0.2rem;
 }
-.tabla-citas td {
-  font-weight: 600;
-  color: var(--color-secundario); 
-  } 
-.card-citas .btn {
-  font-size: 0.9rem;
-  padding: 0.4rem 0.8rem;
- }
-.card-citas h2 {
-  font-size: 1.25rem;
-  margin-bottom: 1rem !important;
+.input-calendario {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    color: var(--color-fuente-oscuro);
+    background-color: #f8f9fa; 
 }
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.input-calendario:focus {
+    border-color: var(--color-primario);
+    box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.25); 
+    outline: none;
+    background-color: white;
 }
 
-/*estilos panel admin*/
-#admin-contenido {
-  animation: fadeIn 0.5s ease-out;
-}
-
-.admin-sidebar .nav-link {
-  transition: all 0.2s ease-in-out;
-  border-left: 4px solid transparent; 
-  border-radius: 0;
-  color: var(--color-fuente-oscuro); 
-}
-
-.admin-sidebar .nav-link:hover {
-  background-color: var(--color-fondo-acento); 
-  border-left: 4px solid var(--color-secundario); 
-  color: var(--color-fuente-oscuro);
-  transform: translateX(5px);
-}
-
-.admin-sidebar .nav-link.active {
+/* Botones de Agendar */
+.btn-agendar {
   background-color: var(--color-primario); 
   color: white;
   font-weight: bold;
-  border-left: 4px solid var(--color-primario);
+  border-radius: 50px; 
+  padding: 0.5rem 1.5rem;
+  transition: all 0.3s ease;
+  text-decoration: none; 
+  text-align: center; 
+}
+.btn-agendar:hover {
+  background-color: var(--color-secundario); 
+  color: white;
+  transform: scale(1.05);
 }
 
-#tabla-citas tbody tr {
-  transition: all 0.2s ease;
-}
-
-#tabla-citas tbody tr:hover {
-  background-color: rgba(20, 184, 166, 0.1); 
-  transform: scale(1.01);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-}
 
 /* ================================================== */
-/* ESTILOS PARA CANCELACIÓN DE CITAS - PANEL ADMIN */
+/* ESTILOS DE TIENDA Y PRODUCTOS */
 /* ================================================== */
 
-/* Estado de citas canceladas */
-.table-secondary {
-    opacity: 0.7;
-    background-color: #f8f9fa !important;
+/* Botones y precios en la tienda */
+.btn-tienda {
+  background-color: var(--color-primario);
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px; 
 }
-
-/* Badges de estado */
-.badge {
-    font-size: 0.75rem;
-    padding: 0.35em 0.65em;
+.btn-tienda:hover {
+  background-color: var(--color-secundario);
+  color: white;
 }
-
-.badge.bg-success {
-    background-color: var(--color-primario) !important;
-}
-
-.badge.bg-danger {
-    background-color: #dc3545 !important;
-}
-
-/* Botón de cancelar */
-.btn-cancelar-cita {
-    font-size: 0.875rem;
-    padding: 0.25rem 0.5rem;
-    background-color: #dc3545;
-    border: none;
-    color: white;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-}
-
-.btn-cancelar-cita:hover {
-    background-color: #c82333;
-    transform: scale(1.05);
-    color: white;
-}
-
-.btn-cancelar-cita:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* Efectos hover mejorados para la tabla */
-#tabla-citas tbody tr {
-    transition: all 0.2s ease;
-}
-
-#tabla-citas tbody tr:hover {
-    background-color: rgba(16, 185, 129, 0.1) !important;
-    transform: scale(1.01);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-}
-
-/* Texto para citas canceladas */
-.text-muted {
-    color: #6c757d !important;
-    font-style: italic;
-}
-
-/* Responsive para la tabla */
-@media (max-width: 768px) {
-    .table-responsive {
-        font-size: 0.875rem;
-    }
-    
-    .btn-cancelar-cita {
-        font-size: 0.75rem;
-        padding: 0.2rem 0.4rem;
-    }
-    
-    .badge {
-        font-size: 0.7rem;
-    }
-}
-
-/* Loading states */
-.btn-cancelar-cita .bi-hourglass-split {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-/* Mejora visual para el sidebar del admin */
-.admin-sidebar {
-    min-height: calc(100vh - 76px);
-    border-right: 1px solid #dee2e6;
-}
-
-.admin-sidebar-link {
-    transition: all 0.2s ease-in-out;
-    border-left: 4px solid transparent;
-    border-radius: 0;
-    color: var(--color-fuente-oscuro);
-    text-decoration: none;
-    display: block;
-    padding: 0.5rem 1rem;
-}
-
-.admin-sidebar-link:hover {
-    background-color: var(--color-fondo-acento);
-    border-left: 4px solid var(--color-secundario);
-    color: var(--color-fuente-oscuro);
-    transform: translateX(5px);
-}
-
-/* --- ESTILOS DE PRODUCTOS Y CATÁLOGO --- */
-
-.card-producto {
-    border-radius: 15px; 
-    transition: all 0.3s ease;
-    height: 100%;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    background-color: #ffffff;
-}
-
-.card-producto:hover {
-    transform: translateY(-10px); 
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
-}
-
-.producto-img {
-    border-radius: 15px 15px 0 0;
-    object-fit: cover;
-    height: 200px;
-    width: 100%;
-}
-
 .precio-tienda {
-    color: var(--color-primario);
-    font-size: 1.5rem;
-    font-weight: 800;
+  color: var(--color-primario);
+  font-size: 1.5rem; 
+  font-weight: 800; 
 }
 
-.card-img-top-container {
-    height: 200px; 
-    overflow: hidden; 
-}
-
-.card-img-top-custom {
-    max-height: 100%; /* La imagen no excederá la altura de su contenedor */
-    max-width: 100%;  /* La imagen no excederá el ancho de su contenedor */
-    object-fit: contain; /* Asegura que la imagen se ajuste sin recortarse */
-}
+/* Imágenes de producto */
+.card-img-top-container { height: 200px; overflow: hidden; }
+.card-img-top-custom { max-height: 100%; max-width: 100%; object-fit: contain; }
+.producto-img { border-radius: 15px 15px 0 0; object-fit: cover; height: 200px; width: 100%; }
 
 /* Badge para categorías */
 .badge-categoria {
@@ -399,7 +208,7 @@ h1, h2, h3, h4, h5, h6, .fw-bolder {
     border: 1px solid var(--color-secundario);
 }
 
-/* Estilos para la navegación de categorías (Pills) */
+/* Navegación de categorías (Pills) */
 .nav-pills .nav-link {
     color: var(--color-fuente-oscuro);
     font-weight: 600;
@@ -408,44 +217,135 @@ h1, h2, h3, h4, h5, h6, .fw-bolder {
     transition: all 0.3s ease;
     margin-bottom: 0.5rem;
 }
-.nav-pills .nav-link:hover {
-    color: var(--color-primario);
+.nav-pills .nav-link:hover { color: var(--color-primario); }
+.nav-pills .nav-link.active { background-color: var(--color-primario); color: white; }
+
+
+/* ================================================== */
+/* ESTILOS PARA LA SECCIÓN CTA Y FOOTER */
+/* ================================================== */
+
+/* Sección de Llamada a la Acción (CTA) */
+.cta-section { background-color: var(--color-primario); }
+.cta-section .btn-light-custom {
+  border-radius: 50px;
+  color: var(--color-primario) !important; 
+  background-color: white;
+  font-weight: bold;
 }
-.nav-pills .nav-link.active {
-    background-color: var(--color-primario);
+
+/* Footer Oscuro */
+.footer-oscuro {
+  background-color: var(--color-fuente-oscuro); 
+}
+.footer-oscuro ul li {
+  color: #bdc3c7; 
+}
+.footer-oscuro a {
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+.footer-oscuro a:hover {
+  color: var(--color-primario); 
+}
+
+
+/* ================================================== */
+/* ESTILOS DE PANEL DE ADMINISTRACIÓN */
+/* ================================================== */
+
+/* Sidebar */
+.admin-sidebar { min-height: calc(100vh - 76px); border-right: 1px solid #dee2e6; }
+.admin-sidebar .nav-link, .admin-sidebar-link {
+  transition: all 0.2s ease-in-out;
+  border-left: 4px solid transparent; 
+  border-radius: 0;
+  color: var(--color-fuente-oscuro); 
+  text-decoration: none; 
+  display: block; 
+  padding: 0.5rem 1rem; 
+}
+.admin-sidebar .nav-link:hover, .admin-sidebar-link:hover {
+  background-color: var(--color-fondo-acento); 
+  border-left: 4px solid var(--color-secundario); 
+  color: var(--color-fuente-oscuro);
+  transform: translateX(5px);
+}
+.admin-sidebar .nav-link.active {
+  background-color: var(--color-primario); 
+  color: white;
+  font-weight: bold;
+  border-left: 4px solid var(--color-primario);
+}
+
+/* Tablas de Citas de Cliente */
+.tabla-citas th, .tabla-citas td { padding: 0.5rem 0.5rem; font-size: 0.9rem; }
+.tabla-citas th { width: 45%; color: var(--color-fuente-oscuro); border-right: 1px solid var(--color-fondo-acento); }
+.tabla-citas td { font-weight: 600; color: var(--color-secundario); } 
+.card-citas .btn { font-size: 0.9rem; padding: 0.4rem 0.8rem;}
+.card-citas h2 { font-size: 1.25rem; margin-bottom: 1rem !important; }
+
+/* Tablas de Citas de Admin */
+#tabla-citas tbody tr { transition: all 0.2s ease; }
+#tabla-citas tbody tr:hover { 
+  background-color: rgba(16, 185, 129, 0.1) !important; 
+  transform: scale(1.01);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.table-secondary { opacity: 0.7; background-color: #f8f9fa !important; } 
+.text-muted { color: #6c757d !important; font-style: italic; } 
+
+/* Botones y Badges de Estado */
+.badge { font-size: 0.75rem; padding: 0.35em 0.65em; }
+.badge.bg-success { background-color: var(--color-primario) !important; }
+.badge.bg-danger { background-color: var(--color-rojo-peligro) !important; }
+
+.btn-cancelar-cita {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    background-color: var(--color-rojo-peligro);
+    border: none;
     color: white;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+.btn-cancelar-cita:hover { background-color: #c82333; transform: scale(1.05); color: white; }
+.btn-cancelar-cita:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+
+/* Responsive Admin */
+@media (max-width: 768px) {
+    .table-responsive { font-size: 0.875rem; }
+    .btn-cancelar-cita { font-size: 0.75rem; padding: 0.2rem 0.4rem; }
+    .badge { font-size: 0.7rem; }
 }
 
 
-@keyframes slideInRight {/* --- ANIMACIÓN DE ENTRADA --- */
-  from {
-      transform: translateX(100%);
-      opacity: 0;
-  }
-  to {
-      transform: translateX(0);
-      opacity: 1;
-  }
+/* ================================================== */
+/* ANIMACIONES */
+/* ================================================== */
+#admin-contenido { animation: fadeIn 0.5s ease-out; }
+
+/* Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideOutRight {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-.toast.show {
-  animation: slideInRight 0.5s ease-out forwards;
-}
-
-
-@keyframes slideOutRight {/* --- ANIMACIÓN DE SALIDA --- */
-  from {
-      transform: translateX(0);
-      opacity: 1;
-  }
-  to {
-      transform: translateX(100%);
-      opacity: 0;
-  }
-}
-
-/* Agregamos !important para asegurar que Bootstrap no lo corte */
-.toast.hiding {
-  animation: slideOutRight 0.5s ease-in forwards !important;
-  opacity: 1; /* Mantiene la opacidad para que se vea el movimiento */
-}
+/* Aplicación de animaciones */
+.toast.show { animation: slideInRight 0.5s ease-out forwards; }
+.toast.hiding { animation: slideOutRight 0.5s ease-in forwards !important; opacity: 1; }
+.btn-cancelar-cita .bi-hourglass-split { animation: spin 1s linear infinite; }
