@@ -22,14 +22,14 @@ const db = firebase.firestore();
 // 2. REFERENCIAS A ELEMENTOS DOM DE CONTROL Y FORMULARIO
 // ==================================================
 
-// Elementos de control de interfaz (necesarios para el nuevo listener)
+// Elementos de control de interfaz
 const loader = document.getElementById('client-loader');
 const errorDiv = document.getElementById('client-error');
 const citasContainer = document.getElementById('citas-container'); // Contenedor del formulario
 const welcomeMessage = document.getElementById('welcomeMessage');
 const logoutBtn = document.getElementById('logoutBtn');
 
-// Elementos del formulario (existentes)
+// Elementos del formulario
 const form = document.getElementById("form-calendario");
 const fechacita = document.getElementById("fecha");
 const horacita = document.getElementById("hora");
@@ -226,7 +226,7 @@ async function actualizarHorasOcupadas() {
     }
 }
 
-// Establecer la fecha mínima y valor por defecto (se mantiene aquí)
+// Establecer la fecha mínima y valor por defecto
 const inputFecha = document.getElementById('fecha');
 const hoyObjeto = new Date();
 const anio = hoyObjeto.getFullYear();
@@ -238,7 +238,7 @@ inputFecha.value = hoy;
 
 
 // ==================================================
-// 4. LISTENER PRINCIPAL DE AUTENTICACIÓN (INTEGRADO)
+// 4. LISTENER PRINCIPAL DE AUTENTICACIÓN
 // ==================================================
 auth.onAuthStateChanged(user => {
     // 1. Mostrar el loader al inicio de la verificación
@@ -283,8 +283,6 @@ auth.onAuthStateChanged(user => {
         // Muestra error y redirige
         errorDiv.textContent = 'Debes iniciar sesión para agendar una cita. Redirigiendo a login...';
         errorDiv.style.display = 'block';
-        
-        // Redirigir después de 3 segundos
         setTimeout(() => { window.location.href = 'login.html' }, 3000);
     }
 });

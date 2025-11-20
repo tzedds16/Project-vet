@@ -66,7 +66,7 @@ h1, h2, h3, h4, h5, h6, .fw-bolder {
 .card-servicio i { color: var(--color-primario); }
 .card-servicio .precio-servicio { color: var(--color-secundario); }
 
-/* Estilos de imágenes hero (si aplica) */
+/* Estilos de imágenes hero */
 #img-hero-1 { border-radius: 80px 0 0 80px; }
 #img-hero-3 { border-radius: 0 0 80px 80px; }
 #img-hero-4 { border-radius: 0 80px 80px 80px; }
