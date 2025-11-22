@@ -183,44 +183,77 @@ async function actualizarHorasOcupadas() {
     const minutoActual = ahora.getMinutes();
 
     try {
-        const dbResponse = await db.collection("citas")
-            .where("fecha", "==", fechaSeleccionada)
-            .where("estado", "in", ["activa", null])
-            .get();
+      const consulta = await db.collection('citas')
+      .where('fecha', '==', fecha)
+      .where('hora', '==', hora)
+      .where("estado", "in", ["activa", null]) // Solo verificar citas activas
+      .get();
 
-        const bookedHours = dbResponse.docs.map((appointmentDoc) => {
-            return appointmentDoc.data().hora;
+      if (!consulta.empty) {
+        alert("La fecha de la cita no esta disponible")
+        actualizarHorasOcupadas();
+        return;
+      }
+
+      const nuevaCita = {
+      fecha: fecha,
+      hora: hora,
+      // Datos del usuario
+      usuarioId: user.uid,
+      usuarioNombre: user.displayName,
+      usuarioEmail: user.email,
+      // Datos de la mascota 
+      motivo: motivo,
+      tipoMascota: tipoMascota,
+      edad: edad,
+      estado: 'activa',
+      fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    if (tipoMascota === 'perro') {
+      nuevaCita.tallaPerro = tallaPerro;
+    }
+    
+    const docRef = await db.collection('citas').add(nuevaCita);
+
+      window.location.href = 'calendarioCliente.html'
+      console.log("Cita guardada con id:", docRef.id)
+
+      // Correo
+      let infoMascota = `${tipoMascota.toUpperCase()} (${edad})`;
+      if (tipoMascota === 'perro' && tallaPerro) {
+        infoMascota += ` - Talla ${tallaPerro}`;
+      }
+
+      const templateParams = {
+        nombre_cliente: user.displayName || "Cliente",
+        email_cliente: user.email, 
+        fecha: fecha,
+        hora: hora,
+        motivo: motivo,
+        detalles_mascota: infoMascota
+      };
+
+      // Cambiar texto del botón visualmente
+      const btnSubmit = form.querySelector('button[type="submit"]');
+      if (btnSubmit) {
+        btnSubmit.textContent = "Enviando confirmación...";
+        btnSubmit.disabled = true;
+      }
+
+      // Enviar el correo
+      emailjs.send('service_w3cv2zd', 'template_uq5qsmu', templateParams)
+        .then(() => {
+          alert("✅ Cita agendada y correo de confirmación enviado.");
+          window.location.href = 'calendarioCliente.html';
+        })
+        .catch((err) => {
+          console.error("Error enviando correo (pero la cita se guardó):", err);
+          // Redirigimos igual porque en Firebase YA ESTÁ guardada
+          alert("✅ Cita agendada correctamente.");
+          window.location.href = 'calendarioCliente.html';
         });
 
-        [...horacita.options].forEach((option) => {
-            const hour = option.value;
-            if (!hour) return;
-            const isBooked = bookedHours.includes(hour);
-
-            const horaOpcion = parseInt(hour.split(":")[0]);
-            const minutoOpcion = parseInt(hour.split(":")[1]);
-
-            let isPast = false;
-            if (fechaSeleccionada === hoy) {
-                if (horaOpcion < horaActual) {
-                    isPast = true;
-                } else if (horaOpcion === horaActual) {
-                    if (minutoOpcion < minutoActual) {
-                        isPast = true;
-                    }
-                }
-            }
-
-            option.disabled = isBooked || isPast;
-
-            if (isBooked) {
-                option.style.backgroundColor = "#f8d7da";
-            } else if (isPast) {
-                option.style.backgroundColor = "#e9ecef";
-            } else {
-                option.style.backgroundColor = "";
-            }
-        });
     } catch (error) {
         console.error("Error al actualizar horas ocupadas:", error);
     }
