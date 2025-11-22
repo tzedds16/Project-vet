@@ -9,88 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="./assets/css/styles.css">
-    
-    <style>
-        .quantity-controls {
-            display: flex;
-            align-items: center;
-            margin: 10px 0;
-        }
-        
-        .qty-btn {
-            width: 35px;
-            height: 35px;
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-        
-        .qty-btn:hover {
-            background: #e9ecef;
-        }
-        
-        .qty-btn:disabled {
-            background: #f8f9fa;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-        
-        .qty-input {
-            width: 60px;
-            height: 35px;
-            text-align: center;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            margin: 0 5px;
-        }
-        
-        .item-total {
-            font-weight: bold;
-            color: #28a745;
-            font-size: 1.1rem;
-        }
-        
-        .stock-info {
-            font-size: 0.85rem;
-            color: #6c757d;
-        }
-        
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #28a745;
-            color: white;
-            padding: 15px 20px;
-            border-radius: 5px;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            transform: translateX(150%);
-            transition: transform 0.3s ease;
-        }
-        
-        .notification.show {
-            transform: translateX(0);
-        }
-        
-        .notification.error {
-            background: #dc3545;
-        }
-        
-        .card-hover {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        
-        .card-hover:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
-        }
-    </style>
 </head>
 <body>
 
@@ -110,93 +28,57 @@
             <div class="col-lg-8">
                 
                 <div id="carrito-loader" class="text-center my-5">
-                    <div class="spinner-border text-success" role="status">
-                        <span class="visually-hidden">Cargando carrito...</span>
-                    </div>
-                    <p class="mt-2 text-muted">Cargando tus productos...</p>
+                    <div class="spinner-border text-success" role="status"></div>
+                    <p>Cargando tus productos...</p>
                 </div>
 
                 <div id="carrito-items-container" class="d-flex flex-column gap-3">
-                    <!-- Los productos del carrito se cargarán aquí dinámicamente -->
-                </div>
+                    </div>
 
             </div>
 
             <div class="col-lg-4">
-                <div class="card border-0 shadow-sm p-4 mt-4 mt-lg-0 rounded-4 bg-light sticky-top" style="top: 20px;">
-                    <h4 class="fw-bold mb-4">Resumen de Compra</h4>
+                <div class="card border-0 shadow-sm p-4 mt-4 mt-lg-0 rounded-4 bg-light">
+                    <h4 class="fw-bold mb-4">Resumen</h4>
                     
                     <div class="d-flex justify-content-between mb-3">
                         <span class="text-muted">Subtotal</span>
-                        <span class="fw-bold" id="subtotal-precio">$0.00 MXN</span>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">Envío</span>
-                        <span class="fw-bold text-success">Gratis</span>
+                        <span class="fw-bold" id="subtotal-precio">$0.00</span>
                     </div>
                     
                     <hr>
                     
                     <div class="d-flex justify-content-between mb-4">
                         <span class="fs-5 fw-bold">Total</span>
-                        <span class="fs-4 fw-bold text-success" id="total-precio">$0.00 MXN</span>
+                        <span class="fs-4 fw-bold text-success" id="total-precio">$0.00</span>
                     </div>
 
-                    <button id="confirmar-compra-btn" class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm mb-3">
-                        <i class="bi bi-shield-check me-2"></i>
-                        Confirmar Compra
+                    <button class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm" onclick="procesarCompra()">
+                        Proceder al Pago <i class="bi bi-credit-card ms-2"></i>
                     </button>
-                    
-                    <div class="text-center">
-                        <small class="text-muted">
-                            <i class="bi bi-lock-fill me-1"></i>
-                            Pago seguro y encriptado
-                        </small>
-                    </div>
-                    
-                    <div class="mt-4 p-3 bg-white rounded-3 border">
-                        <h6 class="fw-bold mb-2">💡 Información importante</h6>
-                        <ul class="small text-muted mb-0 ps-3">
-                            <li>Puedes modificar las cantidades usando los controles</li>
-                            <li>El stock se verifica en tiempo real</li>
-                            <li>Los cambios se guardan automáticamente</li>
-                        </ul>
-                    </div>
                 </div>
             </div>
         </div>
 
     </main>
 
-    <!-- Notificación -->
-    <div id="notification" class="notification"></div>
-
-    <footer class="footer-oscuro text-white py-4 mt-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5 class="fw-bold">PetCare</h5>
-                    <p class="mb-0">Cuidando a tus mejores amigos con amor y profesionalismo</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p class="mb-0">
-                        <i class="bi bi-telephone me-2"></i>+34 123 456 789
-                    </p>
-                    <p class="mb-0">
-                        <i class="bi bi-envelope me-2"></i>info@petcare.com
-                    </p>
-                </div>
-            </div>
-            <hr class="my-3">
-            <p class="text-center text-muted mb-0">&copy; 2025 PetCare. Todos los derechos reservados.</p>
-        </div>
-    </footer>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+   <div class="toast-container position-fixed top-0 end-0 p-3 mt-5" style="z-index: 11">
+  <div id="stockToast" class="toast fade" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header bg-danger text-white">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      <strong class="me-auto">Atención</strong>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body fw-bold" id="toastMensaje">
+      </div>
+  </div>
+</div>
 
     <script src="./assets/js/carrito.js"></script>
 
