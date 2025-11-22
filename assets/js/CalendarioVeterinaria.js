@@ -218,6 +218,42 @@ if (!firebase.apps.length) {
 
       window.location.href = 'calendarioCliente.html'
       console.log("Cita guardada con id:", docRef.id)
+
+      // Correo
+      let infoMascota = `${tipoMascota.toUpperCase()} (${edad})`;
+      if (tipoMascota === 'perro' && tallaPerro) {
+        infoMascota += ` - Talla ${tallaPerro}`;
+      }
+
+      const templateParams = {
+        nombre_cliente: user.displayName || "Cliente",
+        email_cliente: user.email, 
+        fecha: fecha,
+        hora: hora,
+        motivo: motivo,
+        detalles_mascota: infoMascota
+      };
+
+      // Cambiar texto del botón visualmente
+      const btnSubmit = form.querySelector('button[type="submit"]');
+      if (btnSubmit) {
+        btnSubmit.textContent = "Enviando confirmación...";
+        btnSubmit.disabled = true;
+      }
+
+      // Enviar el correo
+      emailjs.send('service_w3cv2zd', 'template_uq5qsmu', templateParams)
+        .then(() => {
+          alert("✅ Cita agendada y correo de confirmación enviado.");
+          window.location.href = 'calendarioCliente.html';
+        })
+        .catch((err) => {
+          console.error("Error enviando correo (pero la cita se guardó):", err);
+          // Redirigimos igual porque en Firebase YA ESTÁ guardada
+          alert("✅ Cita agendada correctamente.");
+          window.location.href = 'calendarioCliente.html';
+        });
+
     } catch (error) {
       alert("Error al agendar la cita. Intenta de nuevo");
       console.log("Error al agendar la cita", error)
