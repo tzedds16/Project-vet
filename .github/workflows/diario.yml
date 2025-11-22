@@ -1,0 +1,33 @@
+name: Robot de Recordatorios Diario
+
+on:
+  schedule:
+    # Ejecutar todos los días a las 14:00 UTC (8:00 AM México)
+    - cron: '0 14 * * *'
+  # Permite ejecutarlo manualmente desde la pestaña Actions para probar
+  workflow_dispatch:
+
+jobs:
+  enviar-correos:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Descargar el código del repositorio
+      uses: actions/checkout@v3
+
+    - name: Instalar Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Instalar librerías necesarias
+      # Instala firebase y nodemailer en el servidor virtual de GitHub
+      run: npm install firebase-admin nodemailer
+
+    - name: Ejecutar el Robot
+      run: node scripts/recordatorio_robot.js
+      env:
+        # GitHub inyectará estas claves secretas
+        FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
+        EMAIL_USER: ${{ secrets.EMAIL_USER }}
+        EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
