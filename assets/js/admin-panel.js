@@ -11,14 +11,13 @@ const btnProductos = document.getElementById('btn-agregar-producto');
 
 const formProducto = document.getElementById('form-agregar-producto');
 
+
 const params = new URLSearchParams(window.location.search);
 const idEditar = params.get("id");
 
 if (idEditar) {
     cargarProductoParaEditar(idEditar);
 }
-
-
 
 auth.onAuthStateChanged(user => {
   if (user) {
@@ -30,15 +29,13 @@ auth.onAuthStateChanged(user => {
         loader.style.display = 'none';    //oculta el loader
         contenido.style.display = 'flex'; //muestra el panel
         
-    
         cargarCitas(); 
-        mostrarPestanaProductos(); 
+        verificarRecordatorios(); 
 
       } else {
-            //no admin
+         //no es admin
         loader.style.display = 'none';
         errorDiv.style.display = 'block';
-        //redirigir
         setTimeout(() => { window.location.href = 'index.html' }, 3000);
       }
     });
@@ -52,30 +49,27 @@ auth.onAuthStateChanged(user => {
   }
 });
 
+
 btnCitas.addEventListener('click', (e) => {
   e.preventDefault(); 
   seccionCitas.style.display = 'block';
+
   seccionProductos.style.display = 'none';
-  
   btnCitas.classList.add('active');
   btnProductos.classList.remove('active');
 });
-
 
 btnProductos.addEventListener('click', (e) => {
   e.preventDefault(); 
   mostrarPestanaProductos(); 
 });
 
-
 function mostrarPestanaProductos() {
   seccionCitas.style.display = 'none';
   seccionProductos.style.display = 'block';
-  
   btnCitas.classList.remove('active');
   btnProductos.classList.add('active');
 }
-
 
 
 function cargarCitas() {
@@ -87,6 +81,7 @@ function cargarCitas() {
             tbody.innerHTML = '<tr><td colspan="8" class="text-center">No hay citas agendadas.</td></tr>';
             return;
         }
+        
         tbody.innerHTML = ''; 
         
         querySnapshot.forEach(doc => {
@@ -121,14 +116,13 @@ function cargarCitas() {
         agregarEventListenersCancelar();
 
     }, error => { 
-        console.error("Error al cargar citas en tiempo real: ", error);
+        console.error("Error al cargar citas: ", error);
         tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Error al cargar las citas.</td></tr>';
     });
 }
 
 function agregarEventListenersCancelar() {
     const botonesCancelar = document.querySelectorAll('.btn-cancelar-cita');
-    
     botonesCancelar.forEach(boton => {
         boton.addEventListener('click', function() {
             const citaId = this.getAttribute('data-cita-id');
@@ -138,13 +132,13 @@ function agregarEventListenersCancelar() {
 }
 
 function cancelarCita(citaId) {
-    if (!confirm('¿Estás seguro de que deseas cancelar esta cita?\n\nEsta acción liberará el espacio para otros clientes.')) {
+    if (!confirm('¿Estás seguro de que deseas cancelar esta cita?')) {
         return;
     }
     
     const boton = document.querySelector(`.btn-cancelar-cita[data-cita-id="${citaId}"]`);
     const textoOriginal = boton.innerHTML;
-    boton.innerHTML = '<i class="bi bi-hourglass-split"></i> Cancelando...';
+    boton.innerHTML = '<i class="bi bi-hourglass-split"></i>...';
     boton.disabled = true;
     
     db.collection('citas').doc(citaId).update({
@@ -154,56 +148,17 @@ function cancelarCita(citaId) {
         canceladoPorNombre: auth.currentUser.displayName || 'Administrador'
     })
     .then(() => {
-        alert('✅ Cita cancelada exitosamente. El espacio ha sido liberado.');
+        alert('✅ Cita cancelada exitosamente.');
     })
     .catch(error => {
-        console.error("Error cancelando cita:", error);
-        alert('❌ Error al cancelar la cita: ' + error.message);
-        
-        // Si falla, sí restauramos el botón
+        console.error("Error:", error);
+        alert('❌ Error: ' + error.message);
         boton.innerHTML = textoOriginal;
         boton.disabled = false;
     });
 }
 
 
-/*
-//agg producto
-formProducto.addEventListener('submit', (e) => {
-  e.preventDefault(); 
-  const nombre = document.getElementById('prod-nombre').value;
-  const categoria = document.getElementById('prod-categoria').value;
-  const precio = parseFloat(document.getElementById('prod-precio').value);
-  const descripcion = document.getElementById('prod-desc').value;
-  const imagenURL = document.getElementById('prod-img').value;
-  const stock = parseInt(document.getElementById('prod-stock').value);
-
-
-  db.collection('productos').add({
-    nombre: nombre,
-    categoria: categoria,
-    precio: precio,
-    descripcion: descripcion,
-    imagenURL: imagenURL ,
-    cantidad: stock
-  })
-  .then((docRef) => {
-   
-    alert(`✅ ¡Producto "${nombre}" agregado con éxito!`);
-    formProducto.reset(); 
-  })
-  .catch((error) => {
-  
-    console.error("Error al agregar producto: ", error);
-    alert('❌ Error al agregar producto: ' + error.message);
-  });
-});
-
-*/
-
-// =======================================================
-//  EDITAR PRODUCTO (cargar info en el formulario)
-// =======================================================
 
 async function cargarProductoParaEditar(id) {
     try {
@@ -211,7 +166,6 @@ async function cargarProductoParaEditar(id) {
 
         if (docProd.exists) {
             const p = docProd.data();
-
             document.getElementById("prod-nombre").value = p.nombre;
             document.getElementById("prod-categoria").value = p.categoria;
             document.getElementById("prod-precio").value = p.precio;
@@ -222,8 +176,8 @@ async function cargarProductoParaEditar(id) {
             window.productoEditando = id;
             formProducto.querySelector("button[type=submit]").innerHTML =
                 `<i class="bi bi-save me-2"></i> Actualizar Producto`;
-
-            console.log("Producto cargado para edición ✔");
+            
+            mostrarPestanaProductos(); 
         } else {
             alert("❌ No se encontró el producto.");
         }
@@ -231,12 +185,6 @@ async function cargarProductoParaEditar(id) {
         console.error(error);
     }
 }
-
-
-
-// =======================================================
-//   Guardar o actualizar producto
-// =======================================================
 
 formProducto.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -248,38 +196,23 @@ formProducto.addEventListener("submit", async (e) => {
     const imagenURL = document.getElementById('prod-img').value;
     const stock = parseInt(document.getElementById('prod-stock').value);
 
-    const data = {
-        nombre,
-        categoria,
-        precio,
-        descripcion,
-        imagenURL,
-        cantidad: stock
-    };
+    const data = { nombre, categoria, precio, descripcion, imagenURL, cantidad: stock };
 
-    // Si existe window.productoEditando → estamos editando
     if (window.productoEditando) {
-
+        // EDITAR
         try {
-            await db.collection("productos")
-                .doc(window.productoEditando)
-                .update(data);
-
+            await db.collection("productos").doc(window.productoEditando).update(data);
             alert("✅ Producto actualizado correctamente.");
-
-            // Reset
             window.productoEditando = null;
             formProducto.reset();
             formProducto.querySelector("button[type=submit]").innerHTML =
                 `<i class="bi bi-plus-circle me-2"></i> Guardar Producto`;
-
         } catch (error) {
             console.error(error);
             alert("❌ Error al actualizar producto.");
         }
-
     } else {
-        // Modo agregar
+        // CREAR
         db.collection("productos").add(data)
             .then(() => {
                 alert(`✔ Producto agregado con éxito`);
@@ -291,3 +224,82 @@ formProducto.addEventListener("submit", async (e) => {
             });
     }
 });
+
+
+function verificarRecordatorios() {
+  console.log("Sistema: Iniciando chequeo de recordatorios...");
+  
+  //fecha mañana
+  const hoy = new Date();
+  const manana = new Date(hoy);
+  manana.setDate(hoy.getDate() + 1);
+  
+  //2025-11-21
+  const anio = manana.getFullYear();
+  const mes = String(manana.getMonth() + 1).padStart(2, '0');
+  const dia = String(manana.getDate()).padStart(2, '0');
+  const fechaManana = `${anio}-${mes}-${dia}`;
+
+  console.log("Buscando citas para:", fechaManana);
+
+  //citas mañana??
+  db.collection('citas')
+    .where('fecha', '==', fechaManana)
+    .where('estado', '==', 'activa') //solo citas con status act
+    .get()
+    .then(querySnapshot => {
+      
+      if (querySnapshot.empty) {
+        console.log("✅ No hay citas para mañana. Todo tranquilo.");
+        return;
+      }
+
+      querySnapshot.forEach(doc => {
+        const cita = doc.data();
+        
+        if (cita.recordatorioEnviado === true) {
+          console.log(` Recordatorio para ${cita.hora} ya fue enviado antes.`);
+          return;
+        }
+
+        // enviar correo
+        enviarCorreoRecordatorio(doc.id, cita);
+      });
+    })
+    .catch(error => {
+      console.error("Error en sistema de recordatorios:", error);
+    });
+}
+
+function enviarCorreoRecordatorio(citaId, cita) {
+    
+  //correo admin logueado
+  const adminActualEmail = auth.currentUser.email;
+
+  const templateParams = {
+    //emailjs
+    admin_email: adminActualEmail, 
+
+    fecha: cita.fecha,
+    hora: cita.hora,
+    cliente: cita.usuarioNombre || "Cliente",
+    mascota: cita.tipoMascota || "Mascota",
+    motivo: cita.motivo || "Consulta"
+  };
+
+ const SERVICE_ID = "service_i598jeq";   
+ const TEMPLATE_ID = "template_s55vzqs"; 
+
+  emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
+    .then(function(response) {
+       console.log(' Correo enviado a', adminActualEmail, response.status, response.text);
+       
+       //marcar como enviado en la BD para no repetir
+       db.collection('citas').doc(citaId).update({
+         recordatorioEnviado: true
+       });
+       
+    }, function(error) {
+       console.error('FAILED...', error);
+    });
+}
