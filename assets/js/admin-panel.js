@@ -194,11 +194,6 @@ async function cargarProductoParaEditar(id) {
 }
 
 
-
-// =======================================================
-//   Guardar o actualizar producto
-// =======================================================
-
 formProducto.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -218,7 +213,7 @@ formProducto.addEventListener("submit", async (e) => {
         cantidad: stock
     };
 
-    // Si existe window.productoEditando → estamos editando
+    // Si estamos editando
     if (window.productoEditando) {
 
         try {
