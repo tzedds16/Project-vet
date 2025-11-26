@@ -313,7 +313,7 @@ function enviarCorreoRecordatorio(citaId, cita) {
 
   //ids del emailjs
   const SERVICE_ID = "service_i598jeq"; 
-  const TEMPLATE_ID = "TU_TEMPLATE_ID";
+  const TEMPLATE_ID = "template_s55vzqs";
 
   emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
     .then(function(response) {
