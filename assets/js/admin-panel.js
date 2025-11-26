@@ -18,8 +18,6 @@ if (idEditar) {
     cargarProductoParaEditar(idEditar);
 }
 
-
-
 auth.onAuthStateChanged(user => {
   if (user) {
     
@@ -33,6 +31,7 @@ auth.onAuthStateChanged(user => {
     
         cargarCitas(); 
         mostrarPestanaProductos(); 
+        verificarRecordatorios();
 
       } else {
             //no admin
@@ -167,44 +166,6 @@ function cancelarCita(citaId) {
 }
 
 
-/*
-//agg producto
-formProducto.addEventListener('submit', (e) => {
-  e.preventDefault(); 
-  const nombre = document.getElementById('prod-nombre').value;
-  const categoria = document.getElementById('prod-categoria').value;
-  const precio = parseFloat(document.getElementById('prod-precio').value);
-  const descripcion = document.getElementById('prod-desc').value;
-  const imagenURL = document.getElementById('prod-img').value;
-  const stock = parseInt(document.getElementById('prod-stock').value);
-
-
-  db.collection('productos').add({
-    nombre: nombre,
-    categoria: categoria,
-    precio: precio,
-    descripcion: descripcion,
-    imagenURL: imagenURL ,
-    cantidad: stock
-  })
-  .then((docRef) => {
-   
-    alert(`✅ ¡Producto "${nombre}" agregado con éxito!`);
-    formProducto.reset(); 
-  })
-  .catch((error) => {
-  
-    console.error("Error al agregar producto: ", error);
-    alert('❌ Error al agregar producto: ' + error.message);
-  });
-});
-
-*/
-
-// =======================================================
-//  EDITAR PRODUCTO (cargar info en el formulario)
-// =======================================================
-
 async function cargarProductoParaEditar(id) {
     try {
         const docProd = await db.collection("productos").doc(id).get();
@@ -291,3 +252,79 @@ formProducto.addEventListener("submit", async (e) => {
             });
     }
 });
+
+
+function verificarRecordatorios() {
+  console.log("recordarios...");
+  
+  //calcular fecha de 'mañana'
+  const hoy = new Date();
+  const manana = new Date(hoy);
+  manana.setDate(hoy.getDate() + 1);
+  
+  const anio = manana.getFullYear();
+  const mes = String(manana.getMonth() + 1).padStart(2, '0');
+  const dia = String(manana.getDate()).padStart(2, '0');
+  const fechaManana = `${anio}-${mes}-${dia}`;
+
+  console.log("mañana: ", fechaManana);
+
+  // buscar las citas para mañana
+  db.collection('citas')
+    .where('fecha', '==', fechaManana)
+    .where('estado', '==', 'activa')
+    .get()
+    .then(querySnapshot => {
+      
+      if (querySnapshot.empty) {
+        console.log("no hay citas para mañana.");
+        return;
+      }
+
+      querySnapshot.forEach(doc => {
+        const cita = doc.data();
+        
+        //recordatorio enviado??
+        if (cita.recordatorioEnviado === true) {
+          console.log(`recordatorio para ${cita.hora} ya fue enviado.`);
+          return;
+        }
+
+        //enviar correo
+        enviarCorreoRecordatorio(doc.id, cita);
+      });
+    })
+    .catch(error => {
+      console.error("Error en sistema de recordatorios:", error);
+    });
+}
+
+function enviarCorreoRecordatorio(citaId, cita) {
+  const adminActualEmail = auth.currentUser.email;
+
+  const templateParams = {
+    admin_email: adminActualEmail, 
+    fecha: cita.fecha,
+    hora: cita.hora,
+    cliente: cita.usuarioNombre || "Cliente",
+    mascota: cita.tipoMascota || "Mascota",
+    motivo: cita.motivo || "Consulta"
+  };
+
+  //ids del emailjs
+  const SERVICE_ID = "service_i598jeq"; 
+  const TEMPLATE_ID = "template_s55vzqs";
+
+  emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
+    .then(function(response) {
+       console.log('correo enviado a ', adminActualEmail);
+       
+       //enviado
+       db.collection('citas').doc(citaId).update({
+         recordatorioEnviado: true
+       });
+       
+    }, function(error) {
+       console.error('FAILED...', error);
+    });
+}
