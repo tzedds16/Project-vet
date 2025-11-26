@@ -194,10 +194,66 @@ formProducto.addEventListener("submit", async (e) => {
     } else {
         await db.collection("productos").add(data);
         alert("✅ Agregado");
+        notificarNovedadProducto(data);
     }
     formProducto.reset();
     formProducto.querySelector("button[type=submit]").innerHTML = `<i class="bi bi-plus-circle me-2"></i> Guardar Producto`;
 });
+
+// SISTEMA DE CORREOS DE NOVEDADES
+async function notificarNovedadProducto(productData) {
+    const SERVICE_ID = "service_cbtqa08";
+    const TEMPLATE_ID_PRODUCTO_NUEVO = "template_g8pkxxw"
+    const USER_ID = 'IFZH0LMLxDTxtyHYl';
+
+    console.log(`📢 Iniciando proceso de notificación de novedad para: ${productData.nombre}`);
+
+    try {
+        // Consultar Firebase para obtener los emails de los clientes
+        console.log("Buscando correos de clientes...");
+        const snapshot = await db.collection('usuarios')
+            .where('rol', '==', 'cliente')
+            .get();
+
+        const emails = [];
+        snapshot.forEach(doc => {
+            const userData = doc.data();
+            if (userData.mail) { 
+                emails.push(userData.mail);
+            }
+        });
+
+        if (emails.length === 0) {
+            console.log("✅ No se encontraron clientes con rol 'cliente' y campo 'mail'. Proceso terminado.");
+            return;
+        }
+
+        console.log(`   -> Clientes encontrados: ${emails.length}. Iniciando envío individual.`);
+
+        // Iterar y enviar correos con EmailJS
+        emails.forEach(email => {
+            const templateParams = {
+                to_email: email,
+                product_name: productData.nombre,
+                product_desc: productData.descripcion,
+                product_price: productData.precio ? productData.precio.toFixed(2) : 'N/A',
+                product_image: productData.imagenURL,
+            };
+
+            emailjs.send(SERVICE_ID, TEMPLATE_ID_PRODUCTO_NUEVO, templateParams, USER_ID)
+                .then(function() {
+                    console.log(`   📧 Correo enviado a: ${email}`);
+                }, function(error) {
+                    console.error(`   ❌ Falló el envío a ${email}:`, error);
+                });
+        });
+
+        console.log("✅ Proceso de notificación disparado para todos los clientes.");
+
+    } catch (error) {
+        console.error("❌ Error en el proceso de notificación de novedad.", error);
+    }
+}
 
 // SISTEMA DE RECORDATORIOS 
 function ejecutarBarridoRecordatorios() {
