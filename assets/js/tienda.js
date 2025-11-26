@@ -74,10 +74,15 @@ function generarBotonesHTML(producto) {
 }
 
 function renderProductos(lista) {
-    listaActual = lista;
+    //listaActual = lista;
+    if(esAdmin){
+        listaActual = lista;
+    }else{
+        listaActual = lista.filter(p => p.cantidad > 0);
+    }
     productoContainer.innerHTML = "";
 
-    if (lista.length === 0) {
+    if (listaActual.length === 0) {
         productoContainer.innerHTML = `<p class="text-center text-muted">No hay productos.</p>`;
         return;
     }
@@ -86,11 +91,19 @@ function renderProductos(lista) {
         // Verificamos si este producto ya está en el carrito del usuario
         // Rojo si quedan menos de 5, gris si hay más
         let stockClass = producto.cantidad < 5 ? "text-danger fw-bold" : "text-muted";
+        let backgroundClass = "";
+
+        if(esAdmin){
+            if (producto.cantidad === 0) backgroundClass = "bg-danger-subtle";      // rojo
+            else if (producto.cantidad <= 5) backgroundClass = "bg-warning-subtle";     // naranja
+            else backgroundClass = "bg-white";              // normal
+        }
+
         const botonesHTML = generarBotonesHTML(producto);
 
         const card = `
             <div class="col-12 col-sm-6 col-md-4 col-lg-3" id="card-${producto.id}">
-                <div class="card h-100 shadow-sm border-0">
+                <div class="card h-100 shadow-sm border-0 ${backgroundClass}">
                     <div class="card-img-top-container d-flex justify-content-center align-items-center p-3">
                         <img src="${producto.imagenURL}" class="card-img-top-custom" alt="${producto.nombre}">
                     </div>
@@ -216,7 +229,7 @@ auth.onAuthStateChanged(async user => {
 
     //Lógica de Carga de Productos (Se ejecuta independientemente del login)
     try {
-        const snapshot = await db.collection("productos").get();
+        const snapshot = await db.collection("productos").orderBy('cantidad', 'asc').get();
 
         if (snapshot.empty) {
             productoContainer.innerHTML = `
