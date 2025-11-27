@@ -1,4 +1,22 @@
+// CONFIGURACIÓN E INICIALIZACIÓN DE FIREBASE
+const firebaseConfig = {
+    apiKey: "AIzaSyCb7ka8ExRoYk6YykUpKKVMvoKk_JfP2ko",
+    authDomain: "petcare-4a63f.firebaseapp.com",
+    projectId: "petcare-4a63f",
+    storageBucket: "petcare-4a63f.firebasestorage.app",
+    messagingSenderId: "443204856539",
+    appId: "1:443204856539:web:9f7362bd4a5a468ce27afe",
+    measurementId: "G-GSYEF3PB7K"
+};
 
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// REFERENCIAS AL DOM
 const loader = document.getElementById('admin-loader');
 const errorDiv = document.getElementById('admin-error');
 const contenido = document.getElementById('admin-contenido');
@@ -18,13 +36,16 @@ if (idEditar) {
     cargarProductoParaEditar(idEditar);
 }
 
+let barridoYaEjecutado = false;
+
+// AUTENTICACIÓN Y GATILLO
 auth.onAuthStateChanged(user => {
   if (user) {
-    
     db.collection('usuarios').doc(user.uid).get().then(doc => {
       
-      //admin??
+      // ¿Es admin?
       if (doc.exists && doc.data().rol === 'administrador') {
+<<<<<<< HEAD
         loader.style.display = 'none';    //oculta el loader
         contenido.style.display = 'flex'; //muestra el panel
         //
@@ -35,18 +56,28 @@ auth.onAuthStateChanged(user => {
         mostrarPestanaProductos(); 
         verificarRecordatorios();
         verificarExistencias();
+=======
+        loader.style.display = 'none';    
+        contenido.style.display = 'flex'; 
+        
+        cargarCitas(); 
+        mostrarPestanaProductos(); 
+
+        // EJECUTAR EL BARRIDO 
+        if (!barridoYaEjecutado) {
+            console.log("🔒 Ejecutando barrido de recordatorios (Única vez)...");
+            ejecutarBarridoRecordatorios(); 
+            barridoYaEjecutado = true; 
+        }
+>>>>>>> main
 
       } else {
-            //no admin
         loader.style.display = 'none';
         errorDiv.style.display = 'block';
-        //redirigir
         setTimeout(() => { window.location.href = 'index.html' }, 3000);
       }
     });
-
   } else {
-    //usuario no logueado
     loader.style.display = 'none';
     errorDiv.innerHTML = 'Debes iniciar sesión. Redirigiendo a login...';
     errorDiv.style.display = 'block';
@@ -54,37 +85,32 @@ auth.onAuthStateChanged(user => {
   }
 });
 
+// INTERFAZ Y PESTAÑAS
 btnCitas.addEventListener('click', (e) => {
   e.preventDefault(); 
   seccionCitas.style.display = 'block';
   seccionProductos.style.display = 'none';
-  
   btnCitas.classList.add('active');
   btnProductos.classList.remove('active');
 });
-
 
 btnProductos.addEventListener('click', (e) => {
   e.preventDefault(); 
   mostrarPestanaProductos(); 
 });
 
-
 function mostrarPestanaProductos() {
   seccionCitas.style.display = 'none';
   seccionProductos.style.display = 'block';
-  
   btnCitas.classList.remove('active');
   btnProductos.classList.add('active');
 }
 
-
-
+// GESTIÓN DE CITAS
 function cargarCitas() {
     const tbody = document.getElementById('citas-body');
     
     db.collection('citas').orderBy('fechaCreacion', 'desc').onSnapshot(querySnapshot => {
-        
         if (querySnapshot.empty) {
             tbody.innerHTML = '<tr><td colspan="8" class="text-center">No hay citas agendadas.</td></tr>';
             return;
@@ -95,7 +121,6 @@ function cargarCitas() {
             const cita = doc.data();       
             const citaId = doc.id;
             const mascotaInfo = `${cita.tipoMascota || ''} (${cita.edad || ''})`;
-            
             const estado = cita.estado || 'activa';
             const badgeClass = estado === 'cancelada' ? 'badge bg-danger' : 'badge bg-success';
             
@@ -110,27 +135,19 @@ function cargarCitas() {
                     <td><span class="${badgeClass}">${estado}</span></td>
                     <td>
                         ${estado === 'activa' ? 
-                            `<button class="btn btn-danger btn-sm btn-cancelar-cita" data-cita-id="${citaId}">
-                                <i class="bi bi-x-circle"></i> Cancelar
-                            </button>` : 
+                            `<button class="btn btn-danger btn-sm btn-cancelar-cita" data-cita-id="${citaId}"><i class="bi bi-x-circle"></i> Cancelar</button>` : 
                             '<span class="text-muted"><i class="bi bi-ban"></i> Cancelada</span>'
                         }
                     </td>
                 </tr>
             `;
         });
-
         agregarEventListenersCancelar();
-
-    }, error => { 
-        console.error("Error al cargar citas en tiempo real: ", error);
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Error al cargar las citas.</td></tr>';
     });
 }
 
 function agregarEventListenersCancelar() {
     const botonesCancelar = document.querySelectorAll('.btn-cancelar-cita');
-    
     botonesCancelar.forEach(boton => {
         boton.addEventListener('click', function() {
             const citaId = this.getAttribute('data-cita-id');
@@ -140,65 +157,41 @@ function agregarEventListenersCancelar() {
 }
 
 function cancelarCita(citaId) {
-    if (!confirm('¿Estás seguro de que deseas cancelar esta cita?\n\nEsta acción liberará el espacio para otros clientes.')) {
-        return;
-    }
-    
-    const boton = document.querySelector(`.btn-cancelar-cita[data-cita-id="${citaId}"]`);
-    const textoOriginal = boton.innerHTML;
-    boton.innerHTML = '<i class="bi bi-hourglass-split"></i> Cancelando...';
-    boton.disabled = true;
+    if (!confirm('¿Deseas cancelar esta cita?')) return;
     
     db.collection('citas').doc(citaId).update({
         estado: 'cancelada',
         fechaCancelacion: firebase.firestore.FieldValue.serverTimestamp(),
-        canceladoPor: auth.currentUser.uid,
-        canceladoPorNombre: auth.currentUser.displayName || 'Administrador'
-    })
-    .then(() => {
-        alert('✅ Cita cancelada exitosamente. El espacio ha sido liberado.');
-    })
-    .catch(error => {
-        console.error("Error cancelando cita:", error);
-        alert('❌ Error al cancelar la cita: ' + error.message);
-        
-        // Si falla, sí restauramos el botón
-        boton.innerHTML = textoOriginal;
-        boton.disabled = false;
+        canceladoPor: auth.currentUser.uid
+    }).then(() => {
+        alert('✅ Cita cancelada exitosamente.');
+    }).catch(error => {
+        console.error("Error:", error);
+        alert('❌ Error al cancelar.');
     });
 }
 
-
+// GESTIÓN DE PRODUCTOS
 async function cargarProductoParaEditar(id) {
     try {
         const docProd = await db.collection("productos").doc(id).get();
-
         if (docProd.exists) {
             const p = docProd.data();
-
             document.getElementById("prod-nombre").value = p.nombre;
             document.getElementById("prod-categoria").value = p.categoria;
             document.getElementById("prod-precio").value = p.precio;
             document.getElementById("prod-desc").value = p.descripcion;
             document.getElementById("prod-img").value = p.imagenURL;
             document.getElementById("prod-stock").value = p.cantidad;
-
             window.productoEditando = id;
-            formProducto.querySelector("button[type=submit]").innerHTML =
-                `<i class="bi bi-save me-2"></i> Actualizar Producto`;
-
-            console.log("Producto cargado para edición ✔");
-        } else {
-            alert("❌ No se encontró el producto.");
+            formProducto.querySelector("button[type=submit]").innerHTML = `<i class="bi bi-save me-2"></i> Actualizar Producto`;
         }
-    } catch (error) {
-        console.error(error);
-    }
+    } catch (error) { console.error(error); }
 }
-
 
 formProducto.addEventListener("submit", async (e) => {
     e.preventDefault();
+<<<<<<< HEAD
 
     const nombre = document.getElementById('prod-nombre').value;
     const categoria = document.getElementById('prod-categoria').value;
@@ -216,105 +209,99 @@ formProducto.addEventListener("submit", async (e) => {
         descripcion,
         imagenURL,
         cantidad: stock
+=======
+    const data = {
+        nombre: document.getElementById('prod-nombre').value,
+        categoria: document.getElementById('prod-categoria').value,
+        precio: parseFloat(document.getElementById('prod-precio').value),
+        descripcion: document.getElementById('prod-desc').value,
+        imagenURL: document.getElementById('prod-img').value,
+        cantidad: parseInt(document.getElementById('prod-stock').value)
+>>>>>>> main
     };
 
-    // Si estamos editando
     if (window.productoEditando) {
-
-        try {
-            await db.collection("productos")
-                .doc(window.productoEditando)
-                .update(data);
-
-            alert("✅ Producto actualizado correctamente.");
-
-            // Reset
-            window.productoEditando = null;
-            formProducto.reset();
-            formProducto.querySelector("button[type=submit]").innerHTML =
-                `<i class="bi bi-plus-circle me-2"></i> Guardar Producto`;
-
-        } catch (error) {
-            console.error(error);
-            alert("❌ Error al actualizar producto.");
-        }
-
+        await db.collection("productos").doc(window.productoEditando).update(data);
+        alert("✅ Actualizado");
+        window.productoEditando = null;
     } else {
-        // Modo agregar
-        db.collection("productos").add(data)
-            .then(() => {
-                alert(`✔ Producto agregado con éxito`);
-                formProducto.reset();
-            })
-            .catch(error => {
-                alert("❌ Error al agregar producto");
-                console.error(error);
-            });
+        await db.collection("productos").add(data);
+        alert("✅ Agregado");
+        notificarNovedadProducto(data);
     }
+    formProducto.reset();
+    formProducto.querySelector("button[type=submit]").innerHTML = `<i class="bi bi-plus-circle me-2"></i> Guardar Producto`;
 });
 
+// SISTEMA DE CORREOS DE NOVEDADES
+async function notificarNovedadProducto(productData) {
+    const SERVICE_ID = "service_cbtqa08";
+    const TEMPLATE_ID_PRODUCTO_NUEVO = "template_g8pkxxw"
+    const USER_ID = 'IFZH0LMLxDTxtyHYl';
 
-function verificarRecordatorios() {
-  console.log("recordarios...");
-  
-  //calcular fecha de 'mañana'
-  const hoy = new Date();
-  const manana = new Date(hoy);
-  manana.setDate(hoy.getDate() + 1);
-  
-  const anio = manana.getFullYear();
-  const mes = String(manana.getMonth() + 1).padStart(2, '0');
-  const dia = String(manana.getDate()).padStart(2, '0');
-  const fechaManana = `${anio}-${mes}-${dia}`;
+    console.log(`📢 Iniciando proceso de notificación de novedad para: ${productData.nombre}`);
 
-  console.log("mañana: ", fechaManana);
+    try {
+        // Consultar Firebase para obtener los emails de los clientes
+        console.log("Buscando correos de clientes...");
+        const snapshot = await db.collection('usuarios')
+            .where('rol', '==', 'cliente')
+            .get();
 
-  // buscar las citas para mañana
-  db.collection('citas')
-    .where('fecha', '==', fechaManana)
-    .where('estado', '==', 'activa')
-    .get()
-    .then(querySnapshot => {
-      
-      if (querySnapshot.empty) {
-        console.log("no hay citas para mañana.");
-        return;
-      }
+        const emails = [];
+        snapshot.forEach(doc => {
+            const userData = doc.data();
+            if (userData.mail) { 
+                emails.push(userData.mail);
+            }
+        });
 
-      querySnapshot.forEach(doc => {
-        const cita = doc.data();
-        
-        //recordatorio enviado??
-        if (cita.recordatorioEnviado === true) {
-          console.log(`recordatorio para ${cita.hora} ya fue enviado.`);
-          return;
+        if (emails.length === 0) {
+            console.log("✅ No se encontraron clientes con rol 'cliente' y campo 'mail'. Proceso terminado.");
+            return;
         }
 
-        //enviar correo
-        enviarCorreoRecordatorio(doc.id, cita);
-      });
-    })
-    .catch(error => {
-      console.error("Error en sistema de recordatorios:", error);
-    });
+        console.log(`   -> Clientes encontrados: ${emails.length}. Iniciando envío individual.`);
+
+        // Iterar y enviar correos con EmailJS
+        emails.forEach(email => {
+            const templateParams = {
+                to_email: email,
+                product_name: productData.nombre,
+                product_desc: productData.descripcion,
+                product_price: productData.precio ? productData.precio.toFixed(2) : 'N/A',
+                product_image: productData.imagenURL,
+            };
+
+            emailjs.send(SERVICE_ID, TEMPLATE_ID_PRODUCTO_NUEVO, templateParams, USER_ID)
+                .then(function() {
+                    console.log(`   📧 Correo enviado a: ${email}`);
+                }, function(error) {
+                    console.error(`   ❌ Falló el envío a ${email}:`, error);
+                });
+        });
+
+        console.log("✅ Proceso de notificación disparado para todos los clientes.");
+
+    } catch (error) {
+        console.error("❌ Error en el proceso de notificación de novedad.", error);
+    }
 }
 
-function enviarCorreoRecordatorio(citaId, cita) {
-  const adminActualEmail = auth.currentUser.email;
+// SISTEMA DE RECORDATORIOS 
+function ejecutarBarridoRecordatorios() {
+    console.log("🧹 Iniciando barrido de recordatorios...");
 
-  const templateParams = {
-    admin_email: adminActualEmail, 
-    fecha: cita.fecha,
-    hora: cita.hora,
-    cliente: cita.usuarioNombre || "Cliente",
-    mascota: cita.tipoMascota || "Mascota",
-    motivo: cita.motivo || "Consulta"
-  };
+    const hoy = new Date();
+    const manana = new Date(hoy);
+    manana.setDate(hoy.getDate() + 1);
 
-  //ids del emailjs
-  const SERVICE_ID = "service_i598jeq"; 
-  const TEMPLATE_ID = "template_s55vzqs";
+    const anio = manana.getFullYear();
+    const mes = String(manana.getMonth() + 1).padStart(2, '0');
+    const dia = String(manana.getDate()).padStart(2, '0');
+    const fechaMañana = `${anio}-${mes}-${dia}`;
 
+<<<<<<< HEAD
   emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
     .then(function(response) {
        console.log('correo enviado a ', adminActualEmail);
@@ -406,3 +393,73 @@ function enviarCorreoExistencias(productoId, producto) {
     });
 }
 
+=======
+    console.log(`📅 Buscando citas para mañana: ${fechaMañana}`);
+
+    db.collection('citas')
+      .where('fecha', '==', fechaMañana)
+      .where('estado', '==', 'activa')
+      .get()
+      .then(snapshot => {
+          if (snapshot.empty) {
+              console.log("✅ No hay citas mañana.");
+              return;
+          }
+
+          snapshot.forEach(doc => {
+              const cita = doc.data();
+
+              // Verificar duplicados
+              if (cita.recordatorio_enviado === true) return;
+
+              console.log(`📧 Notificando cita de: ${cita.usuarioNombre}`);
+
+              // A. Datos CLIENTE
+              const paramsCliente = {
+                  nombre_cliente: cita.usuarioNombre || "Cliente",
+                  email_cliente: cita.usuarioEmail,
+                  fecha: cita.fecha,
+                  hora: cita.hora,
+                  motivo: cita.motivo,
+                  detalles_mascota: cita.tipoMascota
+              };
+
+              // B. Datos ADMIN
+              const paramsAdmin = {
+                  admin_email: auth.currentUser.email,
+                  cliente: cita.usuarioNombre || "Cliente",
+                  mascota: cita.tipoMascota,
+                  fecha: cita.fecha,
+                  hora: cita.hora,
+                  motivo: cita.motivo
+              };
+
+              // C. Envío Doble
+              
+              // 1. Enviar al Cliente 
+              emailjs.send('service_ealzhrg', 'template_t3urm5m', paramsCliente)
+                  .then(() => {
+                      console.log("   -> Enviado al Cliente (Recordatorio).");
+                      
+                      // 2. Enviar al Admin
+                      return emailjs.send(
+                          'service_i598jeq',      
+                          'template_s55vzqs',     
+                          paramsAdmin, 
+                          '6_MAkWwrqO8cGi32h'     
+                      );
+                  })
+                  .then(() => {
+                      console.log("   -> Enviado al Admin.");
+                      
+                      // 3. Marcar en BD
+                      db.collection('citas').doc(doc.id).update({
+                          recordatorio_enviado: true
+                      });
+                  })
+                  .catch(err => console.error("❌ Error en envío:", err));
+          });
+      })
+      .catch(error => console.error("Error en barrido:", error));
+}
+>>>>>>> main

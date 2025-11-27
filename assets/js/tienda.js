@@ -47,7 +47,15 @@ function generarBotonesHTML(producto) {
         return `<a href="admin-panel.html?id=${producto.id}" class="btn btn-warning mt-2">
                    <i class="bi bi-pencil-square me-2"></i> Editar
                </a>`;
-    } else if (enCarrito) {
+    }
+    
+    if (producto.cantidad === 0) {
+        return `<button class="btn btn-danger mt-2" disabled>
+                   AGOTADO
+               </button>`;
+    }
+    
+    else if (enCarrito) {
         // Muestra controles + y -
         return `
             <div class="d-flex justify-content-center align-items-center gap-3 mt-2">
@@ -74,15 +82,12 @@ function generarBotonesHTML(producto) {
 }
 
 function renderProductos(lista) {
-    //listaActual = lista;
-    if(esAdmin){
-        listaActual = lista;
-    }else{
-        listaActual = lista.filter(p => p.cantidad > 0);
-    }
+    
+       listaActual = lista;  //Mantenemos esto para que 'actualizarSoloBotones' sepa qué hay en pantalla
+    
     productoContainer.innerHTML = "";
 
-    if (listaActual.length === 0) {
+    if (lista.length === 0) {
         productoContainer.innerHTML = `<p class="text-center text-muted">No hay productos.</p>`;
         return;
     }
@@ -91,18 +96,42 @@ function renderProductos(lista) {
         // Verificamos si este producto ya está en el carrito del usuario
         // Rojo si quedan menos de 5, gris si hay más
         let stockClass = producto.cantidad < 5 ? "text-danger fw-bold" : "text-muted";
+<<<<<<< HEAD
         let backgroundClass = "bg-white";
+=======
+        let backgroundClass = "";
+        let opacityStyle = ""; // Variable para la opacidad
+>>>>>>> main
 
-        if(esAdmin){
+        if(esAdmin){ //estilos para el admin (colores de fondo segun el stock)
             if (producto.cantidad === 0) backgroundClass = "bg-danger-subtle";      // rojo
             else if (producto.cantidad <= 5) backgroundClass = "bg-warning-subtle";     // naranja
+<<<<<<< HEAD
+=======
+            else backgroundClass = "bg-white";              // normal
+        }else{//estilo para el cliente  
+            if (producto.cantidad === 0) {
+                opacityStyle = "opacity: 0.6;";
+            }
+>>>>>>> main
         }
 
         const botonesHTML = generarBotonesHTML(producto);
 
+        //Logica para cambiar el texto de disponible segun el stock
+        mostrarTexto = producto.cantidad > 0 || esAdmin //esto es para que al admin si le aparzca "disponible 0"
+        
+        const textoDisponibles = mostrarTexto
+            ? `<p class="${stockClass} mb-1" style="font-size: 0.9rem;"> 
+                 <i class="bi bi-box-seam"></i> Disponibles: ${producto.cantidad}
+               </p>`
+            : `<p class="mb-1" style="height: 21px;"></p>`;
+
+          
+
         const card = `
             <div class="col-12 col-sm-6 col-md-4 col-lg-3" id="card-${producto.id}">
-                <div class="card h-100 shadow-sm border-0 ${backgroundClass}">
+                <div class="card h-100 shadow-sm border-0 ${backgroundClass}" style="${opacityStyle}">
                     <div class="card-img-top-container d-flex justify-content-center align-items-center p-3">
                         <img src="${producto.imagenURL}" class="card-img-top-custom" alt="${producto.nombre}">
                     </div>
@@ -111,8 +140,8 @@ function renderProductos(lista) {
                         <h5 class="fw-bold mt-2 mb-auto">${producto.nombre}</h5> 
                         <p class="text-muted mb-2">${producto.descripcion}</p>
                         <p class="fw-bold text-success fs-5">${formatearPrecioMX(producto.precio)}</p>
-                        <p class="${stockClass} mb-1" style="font-size: 0.9rem;"> <i class="bi bi-box-seam"></i> Disponibles: ${producto.cantidad}
-</p>
+                        
+                        ${textoDisponibles} 
                         
                         <div id="btn-container-${producto.id}">
                             ${botonesHTML}
@@ -293,12 +322,6 @@ async function agregarAlCarrito(idProducto) {
     }
 
     const producto = productosGlobal.find(p => p.id === idProducto);
-    
-    // Validación básica de stock
-    if (producto.cantidad <= 0) {
-        alert("Producto agotado");
-        return;
-    }
 
     try {
         

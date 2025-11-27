@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="./assets/css/styles.css">
+    <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 
@@ -52,6 +53,35 @@
                         <span class="fs-5 fw-bold">Total</span>
                         <span class="fs-4 fw-bold text-success" id="total-precio">$0.00</span>
                     </div>
+
+
+                    <!-- seccion de pago -->
+                  <div class="mb-4"> 
+                        <label class="form-label fw-bold text-muted mb-3">Datos de Pago</label>
+                        
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">Número de tarjeta</label>
+                            <div id="card-number-element" class="form-control p-3 shadow-sm" style="border-radius: 10px;">
+                                </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label small text-muted">Vencimiento (MM/AA)</label>
+                                <div id="card-expiry-element" class="form-control p-3 shadow-sm" style="border-radius: 10px;">
+                                    </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small text-muted">CVC</label>
+                                <div id="card-cvc-element" class="form-control p-3 shadow-sm" style="border-radius: 10px;">
+                                    </div>
+                            </div>
+                        </div>
+
+                        <div id="card-errors" class="text-danger mt-2 small fw-bold" role="alert"></div>
+                    </div>
+
+                    
 
                     <button class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm" onclick="procesarCompra()">
                         Proceder al Pago <i class="bi bi-credit-card ms-2"></i>
