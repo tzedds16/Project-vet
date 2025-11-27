@@ -48,6 +48,24 @@ auth.onAuthStateChanged(user => {
         loader.style.display = 'none';    
         contenido.style.display = 'flex'; 
         
+
+        const welcomeMsg = document.getElementById('welcomeMessage');
+        const btnLogin = document.getElementById('loginBtn');
+        const btnLogout = document.getElementById('logoutBtn');
+
+        //user
+        if(welcomeMsg) welcomeMsg.textContent = `👋 Bienvenid@, ${doc.data().nombre || user.email}`;
+        // ocultar btn iniciar sesion
+        if(btnLogin) btnLogin.classList.add('d-none');
+        // mostrar btn cerrar sesión
+        if(btnLogout) btnLogout.classList.remove('d-none');
+        if(btnLogout) {
+            btnLogout.addEventListener('click', () => {
+                auth.signOut().then(() => window.location.href = 'index.html');
+            });
+
+
+        }
         cargarCitas(); 
         mostrarPestanaProductos(); 
 
@@ -184,7 +202,10 @@ formProducto.addEventListener("submit", async (e) => {
         precio: parseFloat(document.getElementById('prod-precio').value),
         descripcion: document.getElementById('prod-desc').value,
         imagenURL: document.getElementById('prod-img').value,
-        cantidad: parseInt(document.getElementById('prod-stock').value)
+        cantidad: parseInt(document.getElementById('prod-stock').value),
+        // Resetear marcas de notificación cuando se actualiza el stock
+        yaNotificadoAgotado: false,
+        yaNotificadoBajo: false
     };
 
     console.log("🔄 Procesando producto...", data);
@@ -371,9 +392,7 @@ function ejecutarBarridoRecordatorios() {
       .catch(error => console.error("Error en barrido:", error));
 }
 
-// ===========================================
 // VERIFICACIÓN DE STOCK AGOTADO (CERO UNIDADES)
-// ===========================================
 async function verificarStockAgotado() {
     console.log("🔍 Verificando stock agotado...");
     
@@ -383,8 +402,8 @@ async function verificarStockAgotado() {
         
         snapshot.forEach(doc => {
             const producto = doc.data();
-            // Stock agotado si tiene 0 unidades
-            if (producto.cantidad === 0) {
+            // Stock agotado si tiene 0 unidades Y no ha sido notificado
+            if (producto.cantidad === 0 && !producto.yaNotificadoAgotado) {
                 productosAgotados.push({
                     id: doc.id,
                     ...producto
@@ -404,7 +423,14 @@ async function verificarStockAgotado() {
                     mensaje: `El producto ${producto.nombre} se ha agotado completamente.`,
                     tipo: "peligro"
                 });
-                console.log("✅ Notificación de stock agotado enviada");
+                
+                // MARCAR COMO YA NOTIFICADO para evitar duplicados
+                await db.collection('productos').doc(producto.id).update({
+                    yaNotificadoAgotado: true,
+                    fechaNotificacionAgotado: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                console.log("✅ Notificación de stock agotado enviada y producto marcado");
             }
         }
         
@@ -413,8 +439,64 @@ async function verificarStockAgotado() {
     }
 }
 
-// Ejecutar verificación de stock agotado cada 30 minutos
-setInterval(verificarStockAgotado, 30 * 60 * 1000);
+// REINICIAR MARCAS CUANDO SE REPONE STOCK
+async function verificarStockRepuesto() {
+    console.log("🔄 Verificando stock repuesto...");
+    
+    try {
+        const snapshot = await db.collection('productos')
+            .where('yaNotificadoAgotado', '==', true)
+            .get();
+        
+        const productosRepuestos = [];
+        
+        snapshot.forEach(doc => {
+            const producto = doc.data();
+            // Si ya estaba notificado como agotado pero ahora tiene stock
+            if (producto.cantidad > 0) {
+                productosRepuestos.push({
+                    id: doc.id,
+                    ...producto
+                });
+            }
+        });
+        
+        console.log(`📦 Productos repuestos encontrados: ${productosRepuestos.length}`);
+        
+        // Quitar la marca de "ya notificado" y notificar reposición
+        for (const producto of productosRepuestos) {
+            console.log(`🔄 Producto repuesto: ${producto.nombre}`);
+            
+            await db.collection('productos').doc(producto.id).update({
+                yaNotificadoAgotado: false,
+                fechaReposicion: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            // Opcional: Notificar que se repuso el producto
+            if (typeof crearNotificacion === 'function') {
+                await crearNotificacion({
+                    titulo: "✅ PRODUCTO REPUESTO",
+                    mensaje: `El producto ${producto.nombre} ha sido repuesto (${producto.cantidad} unidades).`,
+                    tipo: "producto"
+                });
+            }
+            
+            console.log("✅ Marca de notificación removida para producto repuesto");
+        }
+        
+    } catch (error) {
+        console.error("❌ Error en verificación de stock repuesto:", error);
+    }
+}
+
+// Ejecutar verificaciones cada 30 minutos
+setInterval(() => {
+    verificarStockAgotado();
+    verificarStockRepuesto();
+}, 30 * 60 * 1000);
 
 // Ejecutar una vez al cargar la página (después de 10 segundos)
-setTimeout(verificarStockAgotado, 10000);
+setTimeout(() => {
+    verificarStockAgotado();
+    verificarStockRepuesto();
+}, 10000);

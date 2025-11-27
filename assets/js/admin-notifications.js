@@ -277,10 +277,26 @@ function notificarProductoNuevo(data) {
 
 function notificarInventarioBajo(producto) {
     console.log("⚠️ Creando notificación de inventario bajo:", producto.nombre);
+    
+    // Verificar si ya fue notificado recientemente
+    if (producto.yaNotificadoBajo) {
+        console.log("📝 Inventario bajo ya fue notificado anteriormente");
+        return Promise.resolve({ ok: false, error: "Ya notificado" });
+    }
+    
     return crearNotificacion({
-        titulo: "Inventario bajo",
+        titulo: "⚠️ INVENTARIO BAJO",
         mensaje: `El producto ${producto.nombre} tiene pocas unidades (${producto.cantidad}).`,
         tipo: "peligro"
+    }).then(async (result) => {
+        if (result.ok && producto.id) {
+            // Marcar como ya notificado
+            await firebase.firestore().collection('productos').doc(producto.id).update({
+                yaNotificadoBajo: true,
+                fechaNotificacionBajo: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+        return result;
     });
 }
 
@@ -356,9 +372,8 @@ async function limpiezaAutomaticaNotificaciones() {
     }
 }
 
-// ===========================================
+
 // PROGRAMAR LIMPIEZA AUTOMÁTICA
-// ===========================================
 
 // Ejecutar limpieza automática cada 24 horas
 setInterval(limpiezaAutomaticaNotificaciones, 24 * 60 * 60 * 1000);
