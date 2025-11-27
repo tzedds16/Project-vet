@@ -43,36 +43,13 @@ auth.onAuthStateChanged(user => {
   if (user) {
     db.collection('usuarios').doc(user.uid).get().then(doc => {
       
-      //admin??
+      // ¿Es admin?
       if (doc.exists && doc.data().rol === 'administrador') {
-        loader.style.display = 'none';    //oculta el loader
-        contenido.style.display = 'flex'; //muestra el panel
-
-        //
-        const welcomeMsg = document.getElementById('welcomeMessage');
-        const btnLogin = document.getElementById('loginBtn');
-        const btnLogout = document.getElementById('logoutBtn');
-
-        //user
-        if(welcomeMsg) welcomeMsg.textContent = `👋 Bienvenid@, ${doc.data().nombre || user.email}`;
+        loader.style.display = 'none';    
+        contenido.style.display = 'flex'; 
         
-        // ocultar btn iniciar sesion
-        if(btnLogin) btnLogin.classList.add('d-none');
-        
-        // mostrar btn cerrar sesión
-        if(btnLogout) btnLogout.classList.remove('d-none');
-
-        if(btnLogout) {
-            btnLogout.addEventListener('click', () => {
-                auth.signOut().then(() => window.location.href = 'index.html');
-            });
-        }
-        //
-    
         cargarCitas(); 
         mostrarPestanaProductos(); 
-        //verificarRecordatorios();
-        verificarExistencias();
 
         // EJECUTAR EL BARRIDO 
         if (!barridoYaEjecutado) {
@@ -201,9 +178,7 @@ async function cargarProductoParaEditar(id) {
 
 formProducto.addEventListener("submit", async (e) => {
     e.preventDefault();
-
     const data = {
-        aviso: false,
         nombre: document.getElementById('prod-nombre').value,
         categoria: document.getElementById('prod-categoria').value,
         precio: parseFloat(document.getElementById('prod-precio').value),
@@ -212,27 +187,49 @@ formProducto.addEventListener("submit", async (e) => {
         cantidad: parseInt(document.getElementById('prod-stock').value)
     };
 
-    if (window.productoEditando) {
-        //await db.collection("productos").doc(window.productoEditando).update(data);
-        await db.collection("productos")
-          .doc(window.productoEditando)
-          .update({
-              nombre: data.nombre,
-              categoria: data.categoria,
-              precio: data.precio,
-              descripcion: data.descripcion,
-              imagenURL: data.imagenURL,
-              cantidad: data.cantidad,
-              aviso: false
-        });
+    console.log("🔄 Procesando producto...", data);
 
-        alert("✅ Actualizado");
+    if (window.productoEditando) {
+        await db.collection("productos").doc(window.productoEditando).update(data);
+        alert("✅ Producto actualizado");
         window.productoEditando = null;
+        
+        // NOTIFICAR SI EL STOCK QUEDÓ BAJO después de actualizar
+        if (data.cantidad <= 3) {
+            console.log("⚠️ Stock bajo detectado después de actualizar");
+            if (typeof notificarInventarioBajo === 'function') {
+                await notificarInventarioBajo(data);
+                console.log("✅ Notificación de stock bajo enviada");
+            }
+        }
     } else {
         await db.collection("productos").add(data);
-        alert("✅ Agregado");
+        alert("✅ Producto agregado exitosamente");
+        
+        console.log("📦 Producto agregado, creando notificaciones...");
+        
+        // NOTIFICAR NUEVO PRODUCTO
+        if (typeof notificarProductoNuevo === 'function') {
+            console.log("🔔 Llamando notificarProductoNuevo...");
+            await notificarProductoNuevo(data);
+            console.log("✅ Notificación de nuevo producto enviada");
+        } else {
+            console.error("❌ notificarProductoNuevo no es una función");
+        }
+        
+        // NOTIFICAR SI EL STOCK ES BAJO en nuevo producto
+        if (data.cantidad <= 3) {
+            console.log("⚠️ Stock bajo en nuevo producto");
+            if (typeof notificarInventarioBajo === 'function') {
+                await notificarInventarioBajo(data);
+                console.log("✅ Notificación de stock bajo enviada");
+            }
+        }
+        
+        // Enviar correos de novedad (tu función existente)
         notificarNovedadProducto(data);
     }
+    
     formProducto.reset();
     formProducto.querySelector("button[type=submit]").innerHTML = `<i class="bi bi-plus-circle me-2"></i> Guardar Producto`;
 });
@@ -306,7 +303,6 @@ function ejecutarBarridoRecordatorios() {
     const fechaMañana = `${anio}-${mes}-${dia}`;
 
     console.log(`📅 Buscando citas para mañana: ${fechaMañana}`);
-    //console.log("hola");
 
     db.collection('citas')
       .where('fecha', '==', fechaMañana)
@@ -375,79 +371,50 @@ function ejecutarBarridoRecordatorios() {
       .catch(error => console.error("Error en barrido:", error));
 }
 
-//////
-function verificarExistencias() {
-  console.log("existencias...");
-  db.collection('productos')
-            .where('cantidad', '>=', 3)
-            .where('aviso', '==', true)
-            .get()
-            .then(querySnapshot => {
+// ===========================================
+// VERIFICACIÓN DE STOCK AGOTADO (CERO UNIDADES)
+// ===========================================
+async function verificarStockAgotado() {
+    console.log("🔍 Verificando stock agotado...");
+    
+    try {
+        const snapshot = await db.collection('productos').get();
+        const productosAgotados = [];
+        
+        snapshot.forEach(doc => {
+            const producto = doc.data();
+            // Stock agotado si tiene 0 unidades
+            if (producto.cantidad === 0) {
+                productosAgotados.push({
+                    id: doc.id,
+                    ...producto
+                });
+            }
+        });
+        
+        console.log(`📊 Productos agotados encontrados: ${productosAgotados.length}`);
+        
+        // Notificar cada producto agotado
+        for (const producto of productosAgotados) {
+            console.log(`🚨 Producto agotado: ${producto.nombre}`);
             
-            querySnapshot.forEach(doc => {
-                // Reiniciar aviso en Firestore
-                doc.ref.update({ aviso: false });
-            });
-        })
-
-  // buscar los productos que casi se acaban
-  db.collection('productos')
-    .where('cantidad', '<=', 3)
-    .where('aviso', '==', false)
-    .get()
-    .then(querySnapshot => {
-      
-      if (querySnapshot.empty) {
-        console.log("no hay productos con pocas existencias");
-        return;
-      }
-
-      querySnapshot.forEach(doc => {
-        const producto = doc.data();
-        
-        //recordatorio enviado??
-        if (producto.aviso === true) {
-          console.log(`aviso del producto: ${producto.nombre} ya fue enviado.`);
-          return;
+            if (typeof crearNotificacion === 'function') {
+                await crearNotificacion({
+                    titulo: "🚨 PRODUCTO AGOTADO",
+                    mensaje: `El producto ${producto.nombre} se ha agotado completamente.`,
+                    tipo: "peligro"
+                });
+                console.log("✅ Notificación de stock agotado enviada");
+            }
         }
-
-        //enviar correo
-        enviarCorreoExistencias(doc.id, producto);
         
-      });
-    })
-    .catch(error => {
-      console.error("Error en sistema de recordatorios:", error);
-    });
+    } catch (error) {
+        console.error("❌ Error en verificación de stock agotado:", error);
+    }
 }
 
+// Ejecutar verificación de stock agotado cada 30 minutos
+setInterval(verificarStockAgotado, 30 * 60 * 1000);
 
-function enviarCorreoExistencias(productoId, producto) {
-  db.collection('productos').doc(productoId).update({
-         aviso: true
-  });
-  const adminActualEmail = auth.currentUser.email;
-
-  const templateParams = {
-    admin_email: adminActualEmail, 
-    nombre: producto.nombre,
-    categoria: producto.categoria,
-    descripcion: producto.descripcion
-  };
-
-  //ids del emailjs
-  const SERVICE_ID = "service_5bnwel9"; 
-  const TEMPLATE_ID = "template_0cm1vtl";
-  emailjs.init("1qL01MblVxUVPNyxY");
-
-  emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
-    .then(function(response) {
-       console.log('correo de productos enviado a ', adminActualEmail);
-       
-       //enviado
-       
-       
-    }, function(error) {
-       console.error('FAILED...', error);
-    });
-}
+// Ejecutar una vez al cargar la página (después de 10 segundos)
+setTimeout(verificarStockAgotado, 10000);
