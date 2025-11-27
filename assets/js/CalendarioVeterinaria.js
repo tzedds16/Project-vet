@@ -1,6 +1,4 @@
-// ==================================================
-// 1. CONFIGURACIÓN E INICIALIZACIÓN DE FIREBASE
-// ==================================================
+// CONFIGURACIÓN E INICIALIZACIÓN DE FIREBASE
 const firebaseConfig = {
     apiKey: "AIzaSyCb7ka8ExRoYk6YykUpKKVMvoKk_JfP2ko",
     authDomain: "petcare-4a63f.firebaseapp.com",
@@ -18,18 +16,14 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ==================================================
-// 2. REFERENCIAS A ELEMENTOS DOM DE CONTROL Y FORMULARIO
-// ==================================================
+// REFERENCIAS A ELEMENTOS DOM
 
-// Elementos de control de interfaz
 const loader = document.getElementById('client-loader');
 const errorDiv = document.getElementById('client-error');
-const citasContainer = document.getElementById('citas-container'); // Contenedor del formulario
+const citasContainer = document.getElementById('citas-container');
 const welcomeMessage = document.getElementById('welcomeMessage');
 const logoutBtn = document.getElementById('logoutBtn');
 
-// Elementos del formulario
 const form = document.getElementById("form-calendario");
 const fechacita = document.getElementById("fecha");
 const horacita = document.getElementById("hora");
@@ -37,12 +31,8 @@ const tipoMascota = document.getElementById('tipoMascota');
 const labelTallaPerro = document.getElementById('labelTallaPerro');
 const tallaPerro = document.getElementById('tallaPerro');
 
-// ==================================================
-// 3. LÓGICA DEL FORMULARIO 
-// ==================================================
+// LÓGICA DEL FORMULARIO
 
-//Inicializa los listeners de cambio y el evento submit del formulario.
- 
 function inicializarFormularioListeners() {
     // Lógica para mostrar/ocultar Talla del Perro
     if (tipoMascota && tallaPerro && labelTallaPerro) {
@@ -60,10 +50,13 @@ function inicializarFormularioListeners() {
         })
     }
 
-    // Lógica de cambio de fecha (Verifica Domingos)
+    // Lógica de cambio de fecha (Evita domingos y actualiza horas)
     fechacita.addEventListener("change", function () {
-        const fecha = new Date(this.value.replace(/-/g, '/')); // Corregir formato de fecha para new Date
-        if (fecha.getDay() === 0) { // getDay() devuelve 0 para Domingo
+        // Fix para zonas horarias al crear fecha desde string
+        const fechaPartes = this.value.split('-');
+        const fecha = new Date(fechaPartes[0], fechaPartes[1] - 1, fechaPartes[2]);
+        
+        if (fecha.getDay() === 0) { 
             alert("Los domingos no están disponibles para citas.");
             this.value = "";
         } else {
@@ -71,13 +64,12 @@ function inicializarFormularioListeners() {
         }
     });
 
-    // Lógica de Envío de Formulario
+    // EVENTO SUBMIT: GUARDAR CITA Y ENVIAR CORREO
+
     form.addEventListener("submit", async function (e) {
         e.preventDefault();
         const fecha = fechacita.value;
         const hora = horacita.value;
-
-        // Campos del formulario actualizados
         const motivo = document.getElementById("motivo").value;
         const edad = document.getElementById("edad").value;
         const tipoMascota = document.getElementById("tipoMascota").value;
@@ -85,6 +77,7 @@ function inicializarFormularioListeners() {
 
         const user = auth.currentUser;
 
+        // Validaciones
         if (!user) {
             alert("Debes iniciar sesión para agendar una cita");
             return;
@@ -93,14 +86,13 @@ function inicializarFormularioListeners() {
             alert("Por favor completa todos los campos obligatorios");
             return;
         }
-
         if (tipoMascota === 'perro' && !tallaPerro) {
             alert("Por favor, selecciona la talla.");
             return;
         }
 
         try {
-            // Verifica disponibilidad final
+            // Verificar disponibilidad en BD
             const consulta = await db.collection('citas')
                 .where('fecha', '==', fecha)
                 .where('hora', '==', hora)
@@ -108,11 +100,12 @@ function inicializarFormularioListeners() {
                 .get();
 
             if (!consulta.empty) {
-                alert("La fecha y hora de la cita ya no están disponibles. Por favor, selecciona otra hora.");
+                alert("La fecha y hora de la cita ya no están disponibles.");
                 actualizarHorasOcupadas();
                 return;
             }
 
+            // Crear objeto cita
             const nuevaCita = {
                 fecha: fecha,
                 hora: hora,
@@ -130,21 +123,64 @@ function inicializarFormularioListeners() {
                 nuevaCita.tallaPerro = tallaPerro;
             }
 
-            await db.collection('citas').add(nuevaCita);
+            // GUARDAR EN FIREBASE
+            const docRef = await db.collection('citas').add(nuevaCita);
+            console.log("Cita guardada con ID:", docRef.id);
 
-            // Redirige al cliente a su panel de citas después de agendar
-            window.location.href = 'calendarioCliente.html';
+            //  ENVIAR CORREO DE CONFIRMACIÓN (EMAILJS)
+        
+            // Feedback visual en el botón
+            const btnSubmit = form.querySelector('button[type="submit"]');
+            if (btnSubmit) {
+                btnSubmit.textContent = "Enviando confirmación...";
+                btnSubmit.disabled = true;
+            }
+
+            // Preparar detalles de mascota
+            let infoMascota = `${tipoMascota.toUpperCase()} (${edad})`;
+            if (tipoMascota === 'perro' && tallaPerro) {
+                infoMascota += ` - Talla ${tallaPerro}`;
+            }
+
+            // Datos para la plantilla
+            const templateParams = {
+                nombre_cliente: user.displayName || "Cliente",
+                email_cliente: user.email, 
+                fecha: fecha,
+                hora: hora,
+                motivo: motivo,
+                detalles_mascota: infoMascota
+            };
+
+            // Enviar usando tus credenciales
+            emailjs.send('service_ealzhrg', 'template_uq5qsmu', templateParams)
+                .then(() => {
+                    alert("✅ ¡Cita agendada! Te hemos enviado un correo de confirmación.");
+                    window.location.href = 'calendarioCliente.html';
+                })
+                .catch((err) => {
+                    console.error("Error enviando correo:", err);
+                    // Redirigimos igual porque la cita YA se guardó en Firebase
+                    alert("✅ Cita agendada correctamente.");
+                    window.location.href = 'calendarioCliente.html';
+                });
+
         } catch (error) {
             alert("Error al agendar la cita. Intenta de nuevo.");
-            console.error("Error al agendar la cita", error);
+            console.error("Error:", error);
+            const btnSubmit = form.querySelector('button[type="submit"]');
+            if (btnSubmit) {
+                btnSubmit.textContent = "Confirmar Cita";
+                btnSubmit.disabled = false;
+            }
         }
     });
 }
 
-//Llena el select de horas (Horas enteras y medias de 8:00 a 20:30).
+// 4. FUNCIONES AUXILIARES 
 
 function CargarHoras() {
-    horacita.innerHTML = ''; // Limpiar opciones anteriores
+    horacita.innerHTML = ''; 
     const placeholder = document.createElement("option");
     placeholder.value = "";
     placeholder.textContent = "Seleccione una hora";
@@ -168,8 +204,6 @@ function CargarHoras() {
     });
 }
 
-// Consulta las horas ocupadas en Firestore y las deshabilita en el selector.
-
 async function actualizarHorasOcupadas() {
     const fechaSeleccionada = fechacita.value;
     if (!fechaSeleccionada) return;
@@ -183,83 +217,49 @@ async function actualizarHorasOcupadas() {
     const minutoActual = ahora.getMinutes();
 
     try {
-      const consulta = await db.collection('citas')
-      .where('fecha', '==', fecha)
-      .where('hora', '==', hora)
-      .where("estado", "in", ["activa", null]) // Solo verificar citas activas
-      .get();
+        const dbResponse = await db.collection("citas")
+            .where("fecha", "==", fechaSeleccionada)
+            .where("estado", "in", ["activa", null])
+            .get();
 
-      if (!consulta.empty) {
-        alert("La fecha de la cita no esta disponible")
-        actualizarHorasOcupadas();
-        return;
-      }
-
-      const nuevaCita = {
-      fecha: fecha,
-      hora: hora,
-      // Datos del usuario
-      usuarioId: user.uid,
-      usuarioNombre: user.displayName,
-      usuarioEmail: user.email,
-      // Datos de la mascota 
-      motivo: motivo,
-      tipoMascota: tipoMascota,
-      edad: edad,
-      estado: 'activa',
-      fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
-    };
-
-    if (tipoMascota === 'perro') {
-      nuevaCita.tallaPerro = tallaPerro;
-    }
-    
-    const docRef = await db.collection('citas').add(nuevaCita);
-
-      window.location.href = 'calendarioCliente.html'
-      console.log("Cita guardada con id:", docRef.id)
-
-      // Correo
-      let infoMascota = `${tipoMascota.toUpperCase()} (${edad})`;
-      if (tipoMascota === 'perro' && tallaPerro) {
-        infoMascota += ` - Talla ${tallaPerro}`;
-      }
-
-      const templateParams = {
-        nombre_cliente: user.displayName || "Cliente",
-        email_cliente: user.email, 
-        fecha: fecha,
-        hora: hora,
-        motivo: motivo,
-        detalles_mascota: infoMascota
-      };
-
-      // Cambiar texto del botón visualmente
-      const btnSubmit = form.querySelector('button[type="submit"]');
-      if (btnSubmit) {
-        btnSubmit.textContent = "Enviando confirmación...";
-        btnSubmit.disabled = true;
-      }
-
-      // Enviar el correo
-      emailjs.send('service_w3cv2zd', 'template_uq5qsmu', templateParams)
-        .then(() => {
-          alert("✅ Cita agendada y correo de confirmación enviado.");
-          window.location.href = 'calendarioCliente.html';
-        })
-        .catch((err) => {
-          console.error("Error enviando correo (pero la cita se guardó):", err);
-          // Redirigimos igual porque en Firebase YA ESTÁ guardada
-          alert("✅ Cita agendada correctamente.");
-          window.location.href = 'calendarioCliente.html';
+        const bookedHours = dbResponse.docs.map((appointmentDoc) => {
+            return appointmentDoc.data().hora;
         });
 
+        [...horacita.options].forEach((option) => {
+            const hour = option.value;
+            if (!hour) return;
+            const isBooked = bookedHours.includes(hour);
+            
+            const horaOpcion = parseInt(hour.split(":")[0]);
+            const minutoOpcion = parseInt(hour.split(":")[1]);
+
+            let isPast = false;
+            if (fechaSeleccionada === hoy) {
+                if (horaOpcion < horaActual) {
+                    isPast = true;
+                } else if (horaOpcion === horaActual) {
+                    if (minutoOpcion < minutoActual) {
+                        isPast = true;
+                    }
+                }
+            }
+
+            option.disabled = isBooked || isPast;
+            if (isBooked) {
+                option.style.backgroundColor = "#f8d7da";
+            } else if (isPast) {
+                option.style.backgroundColor = "#e9ecef";
+            } else {
+                option.style.backgroundColor = "";
+            }
+        });
     } catch (error) {
         console.error("Error al actualizar horas ocupadas:", error);
     }
 }
 
-// Establecer la fecha mínima y valor por defecto
+// Establecer fecha mínima (Hoy)
 const inputFecha = document.getElementById('fecha');
 const hoyObjeto = new Date();
 const anio = hoyObjeto.getFullYear();
@@ -270,54 +270,41 @@ inputFecha.setAttribute('min', hoy);
 inputFecha.value = hoy;
 
 
-// ==================================================
-// 4. LISTENER PRINCIPAL DE AUTENTICACIÓN
-// ==================================================
+// LISTENER PRINCIPAL DE AUTENTICACIÓN
 auth.onAuthStateChanged(user => {
-    // 1. Mostrar el loader al inicio de la verificación
+    // Reset UI
     loader.style.display = 'block';
     citasContainer.style.display = 'none';
     errorDiv.style.display = 'none';
-    errorDiv.textContent = '';
     welcomeMessage.classList.add('d-none');
     logoutBtn.classList.add('d-none');
 
     if (user) {
-        // 2. USUARIO LOGUEADO
-        
-        // Muestra mensaje de bienvenida
+        // Usuario Logueado
         welcomeMessage.textContent = `👋 Bienvenid@, ${user.displayName || user.email}`;
         welcomeMessage.classList.remove('d-none');
         logoutBtn.classList.remove('d-none');
         
-        // Inicializa el contenido y listeners del formulario
-        CargarHoras(); // Rellena el select de horas
-        inicializarFormularioListeners(); // Configura el comportamiento del form
-        actualizarHorasOcupadas(); // Deshabilita horas no disponibles inicialmente
+        // Inicializar Formulario
+        CargarHoras(); 
+        inicializarFormularioListeners(); 
+        actualizarHorasOcupadas();
 
-        // Oculta el loader y muestra el formulario
+        // Mostrar Formulario
         loader.style.display = 'none';
         citasContainer.style.display = 'block';
 
-        // 3. Manejar el clic en "Cerrar sesión"
         logoutBtn.addEventListener('click', () => {
             auth.signOut().then(() => {
-                // Redirigir después de cerrar sesión
                 window.location.href = 'index.html';
             });
         });
 
     } else {
-        // 4. USUARIO NO LOGUEADO
-        
-        // Oculta el loader
+        // Usuario No Logueado
         loader.style.display = 'none';
-
-        // Muestra error y redirige
-        errorDiv.textContent = 'Debes iniciar sesión para agendar una cita. Redirigiendo a login...';
+        errorDiv.textContent = 'Debes iniciar sesión para agendar una cita. Redirigiendo...';
         errorDiv.style.display = 'block';
         setTimeout(() => { window.location.href = 'login.html' }, 3000);
     }
 });
-
-  

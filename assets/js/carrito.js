@@ -163,46 +163,64 @@ async function procesarCompra() {
     const user = auth.currentUser;
     if (!user) return;
 
-    // 1. Obtener items del carrito
+    // Validar que el carrito no esté vacío antes de intentar cobrar
     const carritoQuery = await db.collection('carrito').where('usuarioId', '==', user.uid).get();
-    
     if (carritoQuery.empty) {
         mostrarNotificacion("Tu carrito está vacío.");
         return;
     }
 
-    // 2. Detener el "vigilante" del carrito (unsubscribe)
-    if (unsubscribe) {
-        unsubscribe();
+    // Deshabilitar botón para evitar doble clic
+    const botonPago = document.querySelector("button[onclick='procesarCompra()']");
+    const textoOriginal = botonPago.innerHTML;
+    botonPago.disabled = true;
+    botonPago.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Procesando...';
+
+                            // --- NUEVO: INTERACCIÓN CON STRIPE ---
+    // Se intenta crear un método de pago con los datos del formulario
+    const { paymentMethod, error } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardNumber,
+        billing_details: {
+            name: user.displayName || user.email,
+            email: user.email
+        }
+    });
+
+    if (error) {
+        // SI HUBO ERROR EN LA TARJETA (Ej: Fondos insuficientes, número mal)
+        console.error(error);
+        const displayError = document.getElementById('card-errors');
+        displayError.textContent = error.message; // Mostramos el error al usuario
+        
+        // Reactivamos el botón para que intente de nuevo
+        botonPago.disabled = false;
+        botonPago.innerHTML = textoOriginal;
+        return; 
     }
 
-    // 3. Generar número de orden simulado
-    const numeroOrden = Math.floor(Math.random() * 1000000) + 5000; 
+    // SI LLEGAMOS AQUÍ, LA TARJETA ES VÁLIDA (PaymentMethod creado)        <<<<-----------------
+    console.log("Tarjeta válida. ID de pago:", paymentMethod.id);
 
-    // 4. Prepara el Lote (Batch) de cambios
+ 
+
+    if (unsubscribe) unsubscribe();
+    const numeroOrden = Math.floor(Math.random() * 1000000) + 5000; 
     const batch = db.batch();
 
     carritoQuery.docs.forEach(doc => {
-        const item = doc.data(); // Aquí están los datos: productoId, cantidad, etc.
-
-        // Borrar el item del carrito | esto solo borra el carrito, no el producto)
+        const item = doc.data();
         batch.delete(doc.ref);
-
-        // RESTAR DEL INVENTARIO (Esta es la magia que faltaba)
-        // Buscamos la referencia al producto original en la colección 'productos'
         const productoRef = db.collection('productos').doc(item.productoId);
-
-        // Usamos 'increment(-cantidad)' para restar. Ej: si llevas 2, increment(-2) es una resta.
         batch.update(productoRef, {
             cantidad: firebase.firestore.FieldValue.increment(-item.cantidad)
         });
     });
 
     try {
-        // Ejecutamos todo junto: Borrar carrito Y Actualizar stock
         await batch.commit(); 
 
-        // 5. Mostrar mensaje de éxito (Pantalla de Ticket)
+       
         const contenedorCentral = document.querySelector('.col-lg-8');
         const contenedorResumen = document.querySelector('.col-lg-4');
 
@@ -214,8 +232,9 @@ async function procesarCompra() {
                 <div class="mb-4">
                     <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
                 </div>
-                <h2 class="fw-bold text-success display-4">¡Compra Exitosa!</h2>
+                <h2 class="fw-bold text-success display-4">¡Pago Exitoso!</h2>
                 <p class="lead mt-3 text-muted">
+                    Pago realizado con tarjeta terminada en **** ${paymentMethod.card.last4}.<br>
                     Gracias por tu compra, <strong>${user.displayName || 'Cliente'}</strong>.
                 </p>
                 
@@ -235,11 +254,66 @@ async function procesarCompra() {
             </div>
         `;
 
-        //mostrarNotificacion(`✅ Inventario actualizado y orden #${numeroOrden} generada.`);
-
     } catch (error) {
-        console.error("Error al procesar:", error);
-        mostrarNotificacion("Hubo un error al procesar tu compra.");
-        setTimeout(() => window.location.reload(), 2000);
+        console.error("Error al procesar DB:", error);
+        mostrarNotificacion("Hubo un error al guardar la orden.");
+        botonPago.disabled = false;
+        botonPago.innerHTML = textoOriginal;
     }
 }
+
+//IMPLEMENTACION PARA PAGOS DE A DEBIS
+
+
+// 1. Inicializa Stripe con tu clave pública
+
+const stripe = Stripe('pk_test_51SXeTPI6kbTFdMEGIz9BW9snUYKDGEI0RmMV4aPhQCKMFAQi2kiJhRRW7GUbyCMeBfZOlFegtTX0u7Utgm32CLXJ00u8lsSnQn'); 
+
+
+const elements = stripe.elements();// Crea una instancia de elementos (el formulario)
+
+// NOTA para el equipo salu2
+/*
+en el 99% de los casos no se debe de poner css asi dentro de js...Este es el 1% donde si se debe usar jaja
+
+esto porque los inputs son iframes que cargan de los servidores de la pagina de pagos
+los navegadores prohiben que los .css afecten a un iframe de otro dominio entones estamos obligados a ahcerlo asi
+*/
+const style = { 
+  base: {
+    color: "#32325d",
+    fontFamily: '"Nunito", sans-serif',
+    fontSmoothing: "antialiased",
+    fontSize: "16px",
+    "::placeholder": {
+      color: "#aab7c4"
+    }
+  },
+  invalid: {
+    color: "#fa755a",
+    iconColor: "#fa755a"
+  }
+};//fin de groseria
+
+
+const cardNumber = elements.create('cardNumber', { style: style, showIcon: true, disableLink:true});
+const cardExpiry = elements.create('cardExpiry', { style: style });
+const cardCvc = elements.create('cardCvc', { style: style });
+
+cardNumber.mount('#card-number-element');
+cardExpiry.mount('#card-expiry-element');
+cardCvc.mount('#card-cvc-element');
+
+
+//MANEJO DE ERRORES (Escuchamos cambios en los 3)
+const displayError = document.getElementById('card-errors');
+
+[cardNumber, cardExpiry, cardCvc].forEach(element => {
+    element.on('change', ({error}) => {
+        if (error) {
+            displayError.textContent = error.message;
+        } else {
+            displayError.textContent = '';
+        }
+    });
+});
