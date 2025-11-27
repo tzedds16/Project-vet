@@ -27,11 +27,14 @@ auth.onAuthStateChanged(user => {
       if (doc.exists && doc.data().rol === 'administrador') {
         loader.style.display = 'none';    //oculta el loader
         contenido.style.display = 'flex'; //muestra el panel
+        //
         
+        //
     
         cargarCitas(); 
         mostrarPestanaProductos(); 
         verificarRecordatorios();
+        verificarExistencias();
 
       } else {
             //no admin
@@ -203,8 +206,10 @@ formProducto.addEventListener("submit", async (e) => {
     const descripcion = document.getElementById('prod-desc').value;
     const imagenURL = document.getElementById('prod-img').value;
     const stock = parseInt(document.getElementById('prod-stock').value);
+    const aviso = false;
 
     const data = {
+        aviso, ////
         nombre,
         categoria,
         precio,
@@ -323,3 +328,81 @@ function enviarCorreoRecordatorio(citaId, cita) {
        console.error('FAILED...', error);
     });
 }
+
+
+//////
+function verificarExistencias() {
+  console.log("existencias...");
+  db.collection('productos')
+            .where('cantidad', '>=', 3)
+            .where('aviso', '==', true)
+            .get()
+            .then(querySnapshot => {
+            
+            querySnapshot.forEach(doc => {
+                // Reiniciar aviso en Firestore
+                doc.ref.update({ aviso: false });
+            });
+        })
+
+  // buscar los productos que casi se acaban
+  db.collection('productos')
+    .where('cantidad', '<=', 3)
+    .where('aviso', '==', false)
+    .get()
+    .then(querySnapshot => {
+      
+      if (querySnapshot.empty) {
+        console.log("no hay productos con pocas existencias");
+        return;
+      }
+
+      querySnapshot.forEach(doc => {
+        const producto = doc.data();
+        
+        //recordatorio enviado??
+        if (producto.aviso === true) {
+          console.log(`aviso del producto: ${producto.nombre} ya fue enviado.`);
+          return;
+        }
+
+        //enviar correo
+        enviarCorreoExistencias(doc.id, producto);
+        
+      });
+    })
+    .catch(error => {
+      console.error("Error en sistema de recordatorios:", error);
+    });
+}
+
+
+function enviarCorreoExistencias(productoId, producto) {
+  const adminActualEmail = auth.currentUser.email;
+
+  const templateParams = {
+    admin_email: adminActualEmail, 
+    nombre: producto.nombre,
+    categoria: producto.categoria,
+    descripcion: producto.descripcion
+  };
+
+  //ids del emailjs
+  const SERVICE_ID = "service_5bnwel9"; 
+  const TEMPLATE_ID = "template_0cm1vtl";
+  emailjs.init("1qL01MblVxUVPNyxY");
+
+  emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
+    .then(function(response) {
+       console.log('correo de productos enviado a ', adminActualEmail);
+       
+       //enviado
+       db.collection('productos').doc(productoId).update({
+         aviso: true
+       });
+       
+    }, function(error) {
+       console.error('FAILED...', error);
+    });
+}
+

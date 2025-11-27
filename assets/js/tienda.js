@@ -91,12 +91,11 @@ function renderProductos(lista) {
         // Verificamos si este producto ya está en el carrito del usuario
         // Rojo si quedan menos de 5, gris si hay más
         let stockClass = producto.cantidad < 5 ? "text-danger fw-bold" : "text-muted";
-        let backgroundClass = "";
+        let backgroundClass = "bg-white";
 
         if(esAdmin){
             if (producto.cantidad === 0) backgroundClass = "bg-danger-subtle";      // rojo
             else if (producto.cantidad <= 5) backgroundClass = "bg-warning-subtle";     // naranja
-            else backgroundClass = "bg-white";              // normal
         }
 
         const botonesHTML = generarBotonesHTML(producto);
