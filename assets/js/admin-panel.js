@@ -195,7 +195,19 @@ formProducto.addEventListener("submit", async (e) => {
     };
 
     if (window.productoEditando) {
-        await db.collection("productos").doc(window.productoEditando).update(data);
+        //await db.collection("productos").doc(window.productoEditando).update(data);
+        await db.collection("productos")
+          .doc(window.productoEditando)
+          .update({
+              nombre: data.nombre,
+              categoria: data.categoria,
+              precio: data.precio,
+              descripcion: data.descripcion,
+              imagenURL: data.imagenURL,
+              cantidad: data.cantidad,
+              aviso: false
+        });
+
         alert("✅ Actualizado");
         window.productoEditando = null;
     } else {
