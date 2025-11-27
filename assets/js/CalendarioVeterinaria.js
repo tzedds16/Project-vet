@@ -1,5 +1,4 @@
 // CONFIGURACIÓN E INICIALIZACIÓN DE FIREBASE
-
 const firebaseConfig = {
     apiKey: "AIzaSyCb7ka8ExRoYk6YykUpKKVMvoKk_JfP2ko",
     authDomain: "petcare-4a63f.firebaseapp.com",
