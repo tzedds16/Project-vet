@@ -43,12 +43,30 @@ auth.onAuthStateChanged(user => {
   if (user) {
     db.collection('usuarios').doc(user.uid).get().then(doc => {
       
-      // ¿Es admin?
+      //admin??
       if (doc.exists && doc.data().rol === 'administrador') {
         loader.style.display = 'none';    //oculta el loader
         contenido.style.display = 'flex'; //muestra el panel
+
         //
+        const welcomeMsg = document.getElementById('welcomeMessage');
+        const btnLogin = document.getElementById('loginBtn');
+        const btnLogout = document.getElementById('logoutBtn');
+
+        //user
+        if(welcomeMsg) welcomeMsg.textContent = `👋 Bienvenid@, ${doc.data().nombre || user.email}`;
         
+        // ocultar btn iniciar sesion
+        if(btnLogin) btnLogin.classList.add('d-none');
+        
+        // mostrar btn cerrar sesión
+        if(btnLogout) btnLogout.classList.remove('d-none');
+
+        if(btnLogout) {
+            btnLogout.addEventListener('click', () => {
+                auth.signOut().then(() => window.location.href = 'index.html');
+            });
+        }
         //
     
         cargarCitas(); 
@@ -288,6 +306,7 @@ function ejecutarBarridoRecordatorios() {
     const fechaMañana = `${anio}-${mes}-${dia}`;
 
     console.log(`📅 Buscando citas para mañana: ${fechaMañana}`);
+    //console.log("hola");
 
     db.collection('citas')
       .where('fecha', '==', fechaMañana)
