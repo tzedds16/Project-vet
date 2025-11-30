@@ -368,7 +368,7 @@ function ejecutarBarridoRecordatorios() {
               // C. Envío Doble
               
               // 1. Enviar al Cliente 
-              emailjs.send('service_ealzhrg', 'template_t3urm5m', paramsCliente)
+              emailjs.send('service_ealzhrg', 'template_t3urm5m', paramsCliente, 'Yf63uXWLaJxUb_rlk') // !!!!
                   .then(() => {
                       console.log("   -> Enviado al Cliente (Recordatorio).");
                       
@@ -377,7 +377,7 @@ function ejecutarBarridoRecordatorios() {
                           'service_i598jeq',      
                           'template_s55vzqs',     
                           paramsAdmin, 
-                          '6_MAkWwrqO8cGi32h'     
+                          '6_MAkWwrqO8cGi32h' 
                       );
                   })
                   .then(() => {
@@ -503,9 +503,6 @@ setTimeout(() => {
     verificarStockRepuesto();
 }, 10000);
 
-
-
-
 /////
 function verificarExistencias() {
   console.log("existencias...");
@@ -572,7 +569,7 @@ function enviarCorreoExistencias(productoId, producto) {
   emailjs.init("1qL01MblVxUVPNyxY");
 
   emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
-    .then(function(response) {
+    .then(function() {
        console.log('correo de productos enviado a ', adminActualEmail);
        
        //enviado
